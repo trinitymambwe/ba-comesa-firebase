@@ -42,7 +42,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#0d1b2a', color: '#e0e0e0' }}>
       {/* TOP BAR */}
-      <div style={{ backgroundColor: '#091420' }} className="text-xs px-4 py-2 flex justify-between" >
+      <div style={{ backgroundColor: '#091420' }} className="text-xs px-4 py-2 flex justify-between">
         <span style={{ color: '#9ca3af' }}>🇿🇲 Zambia's Fashion Marketplace</span>
         <div className="flex gap-4">
           {user ? (
@@ -114,7 +114,9 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold" style={{ color: '#e0e0e0' }}>🔥 Trending Now</h2>
-          <Link href="/products/new" className="text-orange-400 text-sm hover:underline">+ Sell Something</Link>
+          {user && (
+            <Link href="/products/new" className="text-orange-400 text-sm hover:underline">+ Sell Something</Link>
+          )}
         </div>
 
         {loading ? (

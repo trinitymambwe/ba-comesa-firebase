@@ -32,10 +32,16 @@ export default function NewProductPage() {
         getDoc(doc(db, 'profiles', u.uid)).then((snap: any) => {
           if (snap.exists()) {
             const p = snap.data()
+            if (p.role !== 'seller') {
+              router.push('/dashboard')
+              return
+            }
             setSellerName(p.fullName || '')
             setSellerPhone(p.phoneNumber || '')
             setHasWhatsapp(p.hasWhatsapp || false)
             setWhatsappNumber(p.whatsappNumber || '')
+          } else {
+            router.push('/dashboard')
           }
         })
       } else {
@@ -136,48 +142,50 @@ export default function NewProductPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFF8F0' }}>
-      <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#FFF8F0', borderColor: '#FAA307' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#0d1b2a', color: '#e0e0e0' }}>
+      <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black"><span style={{ color: '#E85D04' }}>ba</span> <span style={{ color: '#370617' }}>Comesa</span></Link>
-          <Link href="/dashboard" className="font-medium" style={{ color: '#370617' }}>← Dashboard</Link>
+          <Link href="/" className="text-2xl font-black">
+            <span className="text-orange-500">●</span> <span style={{ color: '#e0e0e0' }}>ba</span><span className="text-orange-500">Comesa</span>
+          </Link>
+          <Link href="/dashboard" style={{ color: '#9ca3af' }} className="hover:text-white text-sm">← Dashboard</Link>
         </div>
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-black mb-8" style={{ color: '#370617' }}>Add New Product</h1>
+        <h1 className="text-3xl font-black mb-8" style={{ color: '#e0e0e0' }}>Add New Product</h1>
 
-        {error && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm">{error}</div>}
+        {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm p-6 md:p-8 space-y-5 border" style={{ borderColor: '#FAA307' }}>
+        <form onSubmit={handleSubmit} className="rounded-3xl shadow-sm p-6 md:p-8 space-y-5 border" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Product Name *</label>
-            <input type="text" value={name} onChange={(e: any) => setName(e.target.value)} required className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="e.g., Vintage Denim Jacket" />
+            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Product Name *</label>
+            <input type="text" value={name} onChange={(e: any) => setName(e.target.value)} required className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="e.g., Vintage Denim Jacket" />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Category</label>
-            <input type="text" value={category} onChange={(e: any) => setCategory(e.target.value)} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="e.g., Dresses, Shoes, Accessories" />
+            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Category</label>
+            <input type="text" value={category} onChange={(e: any) => setCategory(e.target.value)} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="e.g., Dresses, Shoes, Accessories" />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Description</label>
-            <textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 resize-none" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="Describe your product..." />
+            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Description</label>
+            <textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 resize-none" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="Describe your product..." />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Price (K)</label>
-            <input type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} min="0" step="0.01" className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="0.00" />
+            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Price (K)</label>
+            <input type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} min="0" step="0.01" className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="0.00" />
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={showPrice} onChange={(e: any) => setShowPrice(e.target.checked)} />
-            <span className="text-sm font-bold" style={{ color: '#370617' }}>Show price on product page</span>
+            <input type="checkbox" checked={showPrice} onChange={(e: any) => setShowPrice(e.target.checked)} className="accent-orange-500" />
+            <span className="text-sm font-bold" style={{ color: '#9ca3af' }}>Show price on product page</span>
           </label>
 
           <div>
-            <label className="block text-sm font-bold mb-2" style={{ color: '#370617' }}>Product Images</label>
+            <label className="block text-sm font-bold mb-2" style={{ color: '#9ca3af' }}>Product Images</label>
 
             <input
               type="file"
@@ -200,7 +208,7 @@ export default function NewProductPage() {
                   }
                 }}
                 className="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition"
-                style={{ borderColor: '#E85D04', color: '#E85D04' }}
+                style={{ borderColor: '#f97316', color: '#f97316' }}
               >
                 📸 Take Photo
               </button>
@@ -214,7 +222,7 @@ export default function NewProductPage() {
                   }
                 }}
                 className="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition"
-                style={{ borderColor: '#370617', color: '#370617' }}
+                style={{ borderColor: '#9ca3af', color: '#9ca3af' }}
               >
                 🖼️ Choose from Device
               </button>
@@ -223,7 +231,7 @@ export default function NewProductPage() {
             {imagePreviews.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mt-4">
                 {imagePreviews.map((preview, index) => (
-                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden" style={{ backgroundColor: '#0d1b2a' }}>
                     <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -238,7 +246,7 @@ export default function NewProductPage() {
             )}
           </div>
 
-          <button type="submit" disabled={loading} className="w-full text-white font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#E85D04' }}>
+          <button type="submit" disabled={loading} className="w-full text-white font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#f97316' }}>
             {loading ? 'Listing Product...' : 'List Product'}
           </button>
         </form>
