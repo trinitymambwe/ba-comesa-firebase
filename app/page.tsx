@@ -120,13 +120,48 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} style={{ backgroundColor: '#0a1628' }} className="rounded-xl h-64 animate-pulse" />
-            ))}
+          <div className="flex justify-center py-20">
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}>
+              <div style={{
+                animation: 'bagFloat 1.2s ease-in-out infinite',
+                fontSize: '50px'
+              }}>
+                🛍️
+              </div>
+              <p style={{
+                color: '#f97316',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                letterSpacing: '2px',
+                animation: 'pulseText 1.5s ease-in-out infinite'
+              }}>
+                Loading products...
+              </p>
+              <p style={{ color: '#6b7280', fontSize: '12px' }}>
+                <span style={{ color: '#f97316' }}>●</span> ba<span style={{ color: '#f97316' }}>Comesa</span>
+              </p>
+            </div>
+            <style jsx>{`
+              @keyframes bagFloat {
+                0% { transform: translateY(30px); opacity: 0; }
+                30% { opacity: 1; }
+                70% { opacity: 1; }
+                100% { transform: translateY(-30px); opacity: 0; }
+              }
+              @keyframes pulseText {
+                0%, 100% { opacity: 0.4; }
+                50% { opacity: 1; }
+              }
+            `}</style>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20" style={{ color: '#9ca3af' }}>
+            <div style={{ fontSize: '60px', marginBottom: '16px' }}>🛍️</div>
             <p className="text-lg">No products found</p>
             <Link href="/products/new" className="text-orange-400 mt-2 inline-block">Be the first to sell →</Link>
           </div>
