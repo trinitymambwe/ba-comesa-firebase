@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { db, auth } from '@/lib/firebase'
 import { collection, addDoc, getDoc, doc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -14,13 +14,15 @@ export default function NewProductPage() {
   const [price, setPrice] = useState('')
   const [showPrice, setShowPrice] = useState(true)
   const [category, setCategory] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
+  const [images, setImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [sellerName, setSellerName] = useState('')
   const [sellerPhone, setSellerPhone] = useState('')
   const [hasWhatsapp, setHasWhatsapp] = useState(false)
   const [whatsappNumber, setWhatsappNumber] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -43,18 +45,51 @@ export default function NewProductPage() {
     return () => unsub()
   }, [])
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    setImages(prev => [...prev, ...files])
+    
+    const newPreviews = files.map(file => URL.createObjectURL(file))
+    setImagePreviews(prev => [...prev, ...newPreviews])
+  }
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index))
+    setImagePreviews(prev => {
+      URL.revokeObjectURL(prev[index])
+      return prev.filter((_, i) => i !== index)
+    })
+  }
+
+  // Convert images to base64 for storage (since we can't use Firebase Storage on free plan)
+  const imagesToBase64 = async (files: File[]): Promise<string[]> => {
+    const promises = files.map(file => {
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+    })
+    return Promise.all(promises)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     try {
+      const base64Images = await imagesToBase64(images)
+      
       await addDoc(collection(db, 'products'), {
         name,
         description,
         price: price ? parseFloat(price) : null,
         showPrice,
         category,
-        images: imageUrl ? [imageUrl] : [],
+        images: base64Images,
         sellerId: user.uid,
         sellerName,
         sellerPhone,
@@ -87,21 +122,26 @@ export default function NewProductPage() {
         {error && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm">{error}</div>}
 
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm p-6 md:p-8 space-y-5 border" style={{ borderColor: '#FAA307' }}>
+          
+          {/* Product Name */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Product Name *</label>
             <input type="text" value={name} onChange={(e: any) => setName(e.target.value)} required className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="e.g., Vintage Denim Jacket" />
           </div>
 
+          {/* Category */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Category</label>
             <input type="text" value={category} onChange={(e: any) => setCategory(e.target.value)} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="e.g., Dresses, Shoes, Accessories" />
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Description</label>
             <textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 resize-none" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="Describe your product..." />
           </div>
 
+          {/* Price */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Price (K)</label>
             <input type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} min="0" step="0.01" className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="0.00" />
@@ -112,11 +152,72 @@ export default function NewProductPage() {
             <span className="text-sm font-bold" style={{ color: '#370617' }}>Show price on product page</span>
           </label>
 
+          {/* --- NEW IMAGE UPLOAD SECTION --- */}
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Image URL</label>
-            <input type="url" value={imageUrl} onChange={(e: any) => setImageUrl(e.target.value)} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="https://example.com/image.jpg" />
-            <p className="text-xs mt-1" style={{ color: '#370617', opacity: 0.5 }}>Paste an image URL (upload to imgur.com or similar)</p>
+            <label className="block text-sm font-bold mb-2" style={{ color: '#370617' }}>Product Images</label>
+            
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture 
+              multiple 
+              ref={fileInputRef}
+              onChange={handleImageSelect} 
+              className="hidden" 
+              id="image-upload"
+            />
+            
+            <div className="flex gap-3 mb-4">
+              {/* Take Photo Button */}
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (fileInputRef.current) {
+                    fileInputRef.current.setAttribute('capture', 'environment')
+                    fileInputRef.current.click()
+                  }
+                }}
+                className="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition"
+                style={{ borderColor: '#E85D04', color: '#E85D04' }}
+              >
+                📸 Take Photo
+              </button>
+              
+              {/* Select from Device Button */}
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (fileInputRef.current) {
+                    fileInputRef.current.removeAttribute('capture')
+                    fileInputRef.current.click()
+                  }
+                }}
+                className="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition"
+                style={{ borderColor: '#370617', color: '#370617' }}
+              >
+                🖼️ Choose from Device
+              </button>
+            </div>
+
+            {/* Image Previews */}
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                    <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                    <button 
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+          {/* --- END IMAGE UPLOAD SECTION --- */}
 
           <button type="submit" disabled={loading} className="w-full text-white font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#E85D04' }}>
             {loading ? 'Listing Product...' : 'List Product'}
