@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<any[]>([])
   const router = useRouter()
 
-useEffect(() => {
+  useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u: any) => {
       if (!u) { router.push('/auth/login'); return }
       setUser(u)
@@ -23,6 +23,7 @@ useEffect(() => {
     })
     return () => unsub()
   }, [])
+
   useEffect(() => {
     if (!user) return
     const fetchProducts = async () => {
@@ -38,41 +39,41 @@ useEffect(() => {
   const isSeller = profile?.role === 'seller'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFF8F0' }}>
-      <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#FFF8F0', borderColor: '#FAA307' }}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black"><span style={{ color: '#E85D04' }}>ba</span> <span style={{ color: '#370617' }}>Comesa</span></Link>
+    <div className="min-h-screen bg-[#1a1a2e] text-gray-200">
+      <header className="bg-[#16162a] border-b border-gray-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="text-xl font-black">
+            <span className="text-orange-500">●</span> <span className="text-white">ba</span><span className="text-orange-500">Comesa</span>
+          </Link>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/" className="font-medium" style={{ color: '#370617' }}>Browse</Link>
-            <button onClick={() => signOut(auth)} className="font-medium" style={{ color: '#E85D04' }}>Logout</button>
+            <Link href="/" className="text-gray-400 hover:text-white">Browse</Link>
+            <button onClick={() => signOut(auth)} className="text-gray-400 hover:text-red-400">Logout</button>
           </div>
         </div>
-      </nav>
+      </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-black mb-2" style={{ color: '#370617' }}>Welcome, {profile?.fullName || 'User'}</h1>
-        <p className="mb-8" style={{ color: '#370617', opacity: 0.6 }}>{isSeller ? 'Seller Dashboard' : 'Buyer Dashboard'}</p>
+        <h1 className="text-2xl font-bold text-white mb-1">Welcome, {profile?.fullName || 'User'}</h1>
+        <p className="text-gray-500 mb-8">{isSeller ? 'Seller Dashboard' : 'Buyer Dashboard'}</p>
 
         {isSeller && (
-          <div className="bg-white rounded-3xl shadow-sm p-6 md:p-8 mb-8 border" style={{ borderColor: '#FAA307' }}>
+          <div className="bg-[#16162a] rounded-2xl border border-gray-800 p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-black" style={{ color: '#370617' }}>My Products</h2>
-              <Link href="/products/new" className="text-white font-bold px-5 py-2 rounded-full transition" style={{ backgroundColor: '#E85D04' }}>+ Add Product</Link>
+              <h2 className="text-lg font-bold text-white">My Products ({products.length})</h2>
+              <Link href="/products/new" className="bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-orange-600">+ Add Product</Link>
             </div>
             {products.length === 0 ? (
-              <p style={{ color: '#370617', opacity: 0.5 }}>No products yet. Start selling!</p>
+              <p className="text-gray-500">No products yet.</p>
             ) : (
               <div className="space-y-3">
-                {products.map(p => (
-                  <Link key={p.id} href={`/products/${p.id}`} className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50 transition" style={{ backgroundColor: '#FFF8F0' }}>
-                    <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl" style={{ backgroundColor: '#FAA307', opacity: 0.2 }}>
-                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover rounded-xl" /> : '👗'}
+                {products.map((p: any) => (
+                  <Link key={p.id} href={`/products/${p.id}`} className="flex items-center gap-4 p-4 bg-[#0f0f1a] rounded-xl hover:border-gray-600 border border-gray-800 transition">
+                    <div className="w-14 h-14 rounded-lg bg-[#1a1a2e] flex items-center justify-center text-2xl overflow-hidden">
+                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : '📷'}
                     </div>
                     <div className="flex-1">
-                      <p className="font-bold" style={{ color: '#370617' }}>{p.name}</p>
-                      <p className="text-sm" style={{ color: '#370617', opacity: 0.5 }}>
-                        {p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'} · {p.status}
-                      </p>
+                      <p className="font-bold text-white">{p.name}</p>
+                      <p className="text-xs text-gray-500">{p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'} · {p.status}</p>
                     </div>
                   </Link>
                 ))}
@@ -81,14 +82,13 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Profile card */}
-        <div className="bg-white rounded-3xl shadow-sm p-6 md:p-8 border" style={{ borderColor: '#FAA307' }}>
-          <h2 className="text-xl font-black mb-4" style={{ color: '#370617' }}>Profile</h2>
+        <div className="bg-[#16162a] rounded-2xl border border-gray-800 p-6">
+          <h2 className="text-lg font-bold text-white mb-4">Profile</h2>
           <div className="space-y-2 text-sm">
-            <p><span style={{ color: '#370617', opacity: 0.5 }}>Name:</span> <span style={{ color: '#370617', fontWeight: 'bold' }}>{profile?.fullName || 'Not set'}</span></p>
-            <p><span style={{ color: '#370617', opacity: 0.5 }}>Email:</span> <span style={{ color: '#370617', fontWeight: 'bold' }}>{user.email}</span></p>
-            <p><span style={{ color: '#370617', opacity: 0.5 }}>Role:</span> <span style={{ color: '#370617', fontWeight: 'bold' }} className="capitalize">{profile?.role}</span></p>
-            {profile?.phoneNumber && <p><span style={{ color: '#370617', opacity: 0.5 }}>Phone:</span> <span style={{ color: '#370617', fontWeight: 'bold' }}>{profile.phoneNumber}</span></p>}
+            <p><span className="text-gray-500">Name:</span> <span className="text-white font-bold">{profile?.fullName || 'Not set'}</span></p>
+            <p><span className="text-gray-500">Email:</span> <span className="text-white font-bold">{user.email}</span></p>
+            <p><span className="text-gray-500">Role:</span> <span className="text-white font-bold capitalize">{profile?.role}</span></p>
+            {profile?.phoneNumber && <p><span className="text-gray-500">Phone:</span> <span className="text-white font-bold">{profile.phoneNumber}</span></p>}
           </div>
         </div>
       </main>

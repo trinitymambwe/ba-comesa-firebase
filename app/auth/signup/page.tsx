@@ -56,16 +56,18 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center px-4 py-8">
+      <div className="max-w-md w-full bg-[#16162a] rounded-2xl border border-gray-800 p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#1a1a2e]">ba Comesa Marketplace</h1>
-          <p className="text-gray-500 mt-2">Create your account to get started.</p>
+          <Link href="/" className="text-2xl font-black">
+            <span className="text-orange-500">●</span> <span className="text-white">ba</span><span className="text-orange-500">Comesa</span>
+          </Link>
+          <p className="text-gray-400 mt-2 text-sm">Create your account</p>
         </div>
 
-        {error && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">{error}</div>}
+        {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm">{error}</div>}
 
-        <button onClick={handleGoogleSignup} className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 hover:border-gray-400 text-gray-700 font-medium py-3 px-4 rounded-xl transition-all mb-4">
+        <button onClick={handleGoogleSignup} className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-gray-800 font-medium py-3 px-4 rounded-xl transition-all mb-4">
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -76,58 +78,58 @@ export default function SignupPage() {
         </button>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-gray-200"></div>
-          <span className="text-gray-400 text-sm">or</span>
-          <div className="flex-1 h-px bg-gray-200"></div>
+          <div className="flex-1 h-px bg-gray-700"></div>
+          <span className="text-gray-500 text-sm">or</span>
+          <div className="flex-1 h-px bg-gray-700"></div>
         </div>
 
         <form onSubmit={handleEmailSignup} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="John Doe" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="John Doe" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="you@example.com" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="you@example.com" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="••••••••" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="••••••••" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">I want to:</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">I want to:</label>
             <div className="grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setRole('buyer')} className={`py-3 px-4 rounded-xl border-2 font-medium transition-all ${role === 'buyer' ? 'border-[#0f766e] bg-[#f0fdfa] text-[#0f766e]' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>🛍️ Buy Products</button>
-              <button type="button" onClick={() => setRole('seller')} className={`py-3 px-4 rounded-xl border-2 font-medium transition-all ${role === 'seller' ? 'border-[#0f766e] bg-[#f0fdfa] text-[#0f766e]' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>🏪 Sell Products</button>
+              <button type="button" onClick={() => setRole('buyer')} className={`py-3 px-4 rounded-xl border font-medium transition-all ${role === 'buyer' ? 'border-orange-500 bg-orange-500/10 text-orange-400' : 'border-gray-700 text-gray-500 hover:border-gray-500'}`}>🛍️ Buy Products</button>
+              <button type="button" onClick={() => setRole('seller')} className={`py-3 px-4 rounded-xl border font-medium transition-all ${role === 'seller' ? 'border-orange-500 bg-orange-500/10 text-orange-400' : 'border-gray-700 text-gray-500 hover:border-gray-500'}`}>🏪 Sell Products</button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number {role === 'seller' ? '(required)' : '(optional)'}</label>
-            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required={role === 'seller'} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="+260 97 1234567" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Phone {role === 'seller' ? '*' : ''}</label>
+            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required={role === 'seller'} className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="+260 97 1234567" />
           </div>
 
           {role === 'seller' && (
-            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+            <div className="bg-[#0f0f1a] rounded-xl p-4 space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={hasWhatsapp} onChange={(e) => setHasWhatsapp(e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]" />
-                <span className="text-sm font-medium text-gray-700">I have WhatsApp</span>
+                <input type="checkbox" checked={hasWhatsapp} onChange={(e) => setHasWhatsapp(e.target.checked)} className="w-5 h-5 rounded border-gray-600 bg-[#0f0f1a] accent-orange-500" />
+                <span className="text-sm text-gray-300">I have WhatsApp</span>
               </label>
               {hasWhatsapp && (
-                <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="WhatsApp number (if different)" />
+                <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="WhatsApp number (if different)" />
               )}
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="w-full bg-[#0f766e] hover:bg-[#115e59] text-white font-semibold py-3 px-4 rounded-xl transition-all disabled:opacity-50 mt-2">
+          <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-50 mt-2">
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 
         <p className="text-center text-gray-500 text-sm mt-6">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-[#0f766e] font-semibold hover:underline">Sign In</Link>
+          <Link href="/auth/login" className="text-orange-400 font-semibold hover:underline">Sign In</Link>
         </p>
       </div>
     </div>
