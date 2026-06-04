@@ -50,7 +50,7 @@ export default function NewProductPage() {
     if (files.length === 0) return
 
     setImages(prev => [...prev, ...files])
-    
+
     const newPreviews = files.map(file => URL.createObjectURL(file))
     setImagePreviews(prev => [...prev, ...newPreviews])
   }
@@ -63,12 +63,36 @@ export default function NewProductPage() {
     })
   }
 
-  // Convert images to base64 for storage (since we can't use Firebase Storage on free plan)
   const imagesToBase64 = async (files: File[]): Promise<string[]> => {
     const promises = files.map(file => {
       return new Promise<string>((resolve, reject) => {
         const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
+        reader.onload = (e) => {
+          const img = new Image()
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            const maxWidth = 800
+            const maxHeight = 800
+            let width = img.width
+            let height = img.height
+
+            if (width > maxWidth) {
+              height = (maxWidth / width) * height
+              width = maxWidth
+            }
+            if (height > maxHeight) {
+              width = (maxHeight / height) * width
+              height = maxHeight
+            }
+
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            ctx?.drawImage(img, 0, 0, width, height)
+            resolve(canvas.toDataURL('image/jpeg', 0.6))
+          }
+          img.src = e.target?.result as string
+        }
         reader.onerror = reject
         reader.readAsDataURL(file)
       })
@@ -81,8 +105,12 @@ export default function NewProductPage() {
     setLoading(true)
     setError('')
     try {
-      const base64Images = await imagesToBase64(images)
-      
+      let base64Images: string[] = []
+
+      if (images.length > 0) {
+        base64Images = await imagesToBase64(images)
+      }
+
       await addDoc(collection(db, 'products'), {
         name,
         description,
@@ -100,7 +128,7 @@ export default function NewProductPage() {
       })
       router.push('/dashboard')
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Something went wrong. Try smaller images.')
     }
     setLoading(false)
   }
@@ -122,26 +150,22 @@ export default function NewProductPage() {
         {error && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm">{error}</div>}
 
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm p-6 md:p-8 space-y-5 border" style={{ borderColor: '#FAA307' }}>
-          
-          {/* Product Name */}
+
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Product Name *</label>
             <input type="text" value={name} onChange={(e: any) => setName(e.target.value)} required className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="e.g., Vintage Denim Jacket" />
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Category</label>
             <input type="text" value={category} onChange={(e: any) => setCategory(e.target.value)} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="e.g., Dresses, Shoes, Accessories" />
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Description</label>
             <textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 resize-none" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="Describe your product..." />
           </div>
 
-          {/* Price */}
           <div>
             <label className="block text-sm font-bold mb-1" style={{ color: '#370617' }}>Price (K)</label>
             <input type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} min="0" step="0.01" className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ borderColor: '#FAA307', color: '#370617' }} placeholder="0.00" />
@@ -152,25 +176,23 @@ export default function NewProductPage() {
             <span className="text-sm font-bold" style={{ color: '#370617' }}>Show price on product page</span>
           </label>
 
-          {/* --- NEW IMAGE UPLOAD SECTION --- */}
           <div>
             <label className="block text-sm font-bold mb-2" style={{ color: '#370617' }}>Product Images</label>
-            
-            <input 
-              type="file" 
-              accept="image/*" 
-              capture 
-              multiple 
+
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
               ref={fileInputRef}
-              onChange={handleImageSelect} 
-              className="hidden" 
+              onChange={handleImageSelect}
+              className="hidden"
               id="image-upload"
             />
-            
+
             <div className="flex gap-3 mb-4">
-              {/* Take Photo Button */}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => {
                   if (fileInputRef.current) {
                     fileInputRef.current.setAttribute('capture', 'environment')
@@ -182,10 +204,9 @@ export default function NewProductPage() {
               >
                 📸 Take Photo
               </button>
-              
-              {/* Select from Device Button */}
-              <button 
-                type="button" 
+
+              <button
+                type="button"
                 onClick={() => {
                   if (fileInputRef.current) {
                     fileInputRef.current.removeAttribute('capture')
@@ -199,13 +220,12 @@ export default function NewProductPage() {
               </button>
             </div>
 
-            {/* Image Previews */}
             {imagePreviews.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mt-4">
                 {imagePreviews.map((preview, index) => (
                   <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                     <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                    <button 
+                    <button
                       type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
@@ -217,7 +237,6 @@ export default function NewProductPage() {
               </div>
             )}
           </div>
-          {/* --- END IMAGE UPLOAD SECTION --- */}
 
           <button type="submit" disabled={loading} className="w-full text-white font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#E85D04' }}>
             {loading ? 'Listing Product...' : 'List Product'}
