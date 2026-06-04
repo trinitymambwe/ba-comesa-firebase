@@ -35,33 +35,46 @@ export default function SetupProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-center text-[#1a1a2e] mb-2">Complete Your Profile</h1>
-        <p className="text-center text-gray-500 mb-6">Tell us how you want to use ba Comesa Marketplace.</p>
+    <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-[#16162a] rounded-2xl border border-gray-800 p-8">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-white mb-2">Complete Your Profile</h1>
+          <p className="text-gray-400 text-sm">Tell us how you want to use ba Comesa Marketplace.</p>
+        </div>
 
-        <form onSubmit={handleSetup} className="space-y-4">
+        <form onSubmit={handleSetup} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">I want to:</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">I want to:</label>
             <div className="grid grid-cols-2 gap-3">
-              <button type="button" onClick={() => setRole('buyer')} className={`py-3 px-4 rounded-xl border-2 font-medium transition-all ${role === 'buyer' ? 'border-[#0f766e] bg-[#f0fdfa] text-[#0f766e]' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>🛍️ Buy Products</button>
-              <button type="button" onClick={() => setRole('seller')} className={`py-3 px-4 rounded-xl border-2 font-medium transition-all ${role === 'seller' ? 'border-[#0f766e] bg-[#f0fdfa] text-[#0f766e]' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>🏪 Sell Products</button>
+              <button type="button" onClick={() => setRole('buyer')} className={`py-4 px-4 rounded-xl border-2 font-bold transition-all ${role === 'buyer' ? 'border-orange-500 bg-orange-500/10 text-orange-400' : 'border-gray-700 text-gray-500 hover:border-gray-500'}`}>
+                🛍️ Buy Products
+              </button>
+              <button type="button" onClick={() => setRole('seller')} className={`py-4 px-4 rounded-xl border-2 font-bold transition-all ${role === 'seller' ? 'border-orange-500 bg-orange-500/10 text-orange-400' : 'border-gray-700 text-gray-500 hover:border-gray-500'}`}>
+                🏪 Sell Products
+              </button>
             </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number {role === 'seller' ? '(required)' : '(optional)'}</label>
-            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required={role === 'seller'} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="+260 97 1234567" />
+            <label className="block text-sm font-medium text-gray-300 mb-1">Phone Number {role === 'seller' ? '(required)' : '(optional)'}</label>
+            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required={role === 'seller'} className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="+260 97 1234567" />
           </div>
+
           {role === 'seller' && (
-            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+            <div className="bg-[#0f0f1a] rounded-xl p-4 space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={hasWhatsapp} onChange={(e) => setHasWhatsapp(e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]" />
-                <span className="text-sm font-medium text-gray-700">I have WhatsApp</span>
+                <input type="checkbox" checked={hasWhatsapp} onChange={(e) => setHasWhatsapp(e.target.checked)} className="w-5 h-5 rounded border-gray-600 accent-orange-500" />
+                <span className="text-sm text-gray-300">I have WhatsApp</span>
               </label>
-              {hasWhatsapp && <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent" placeholder="WhatsApp number (if different)" />}
+              {hasWhatsapp && (
+                <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full px-4 py-3 bg-[#0f0f1a] border border-gray-700 rounded-xl focus:outline-none focus:border-orange-500 text-white placeholder-gray-500" placeholder="WhatsApp number (if different)" />
+              )}
             </div>
           )}
-          <button type="submit" disabled={loading} className="w-full bg-[#0f766e] hover:bg-[#115e59] text-white font-semibold py-3 px-4 rounded-xl transition-all disabled:opacity-50">{loading ? 'Saving...' : 'Complete Setup'}</button>
+
+          <button type="submit" disabled={loading} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-50">
+            {loading ? 'Saving...' : 'Complete Setup'}
+          </button>
         </form>
       </div>
     </div>
