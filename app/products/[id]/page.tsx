@@ -12,20 +12,25 @@ export default function ProductPage() {
   const [product, setProduct] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
+    if (!mounted) return
     const unsub = onAuthStateChanged(auth, (u: any) => setUser(u))
     return () => unsub()
-  }, [])
+  }, [mounted])
 
   useEffect(() => {
+    if (!id || !mounted) return
     const fetchProduct = async () => {
       const snap = await getDoc(doc(db, 'products', id as string))
       if (snap.exists()) setProduct({ id: snap.id, ...snap.data() })
       setLoading(false)
     }
-    if (id) fetchProduct()
-  }, [id])
+    fetchProduct()
+  }, [id, mounted])
 
   const handleSmsChat = () => {
     if (!product?.sellerPhone) return
@@ -39,62 +44,69 @@ export default function ProductPage() {
     window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
   }
 
-  if (loading) return <div className="text-center py-20" style={{ color: '#370617' }}>Loading...</div>
-  if (!product) return <div className="text-center py-20" style={{ color: '#370617' }}>Product not found</div>
+  if (!mounted || loading) return <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center text-white">Loading...</div>
+  if (!product) return <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center text-white">Product not found</div>
 
   const isOwner = user?.uid === product.sellerId
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFF8F0' }}>
-      <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#FFF8F0', borderColor: '#FAA307' }}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black">
-            <span style={{ color: '#E85D04' }}>ba</span> <span style={{ color: '#370617' }}>Comesa</span>
+    <div className="min-h-screen bg-[#1a1a2e] text-gray-200">
+      <header className="bg-[#16162a] border-b border-gray-800 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="text-xl font-black">
+            <span className="text-orange-500">●</span> <span className="text-white">ba</span><span className="text-orange-500">Comesa</span>
           </Link>
-          <Link href="/" className="font-medium" style={{ color: '#370617' }}>← Back</Link>
+          <Link href="/" className="text-gray-400 hover:text-white text-sm">← Back</Link>
         </div>
-      </nav>
+      </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-3xl shadow-sm overflow-hidden border" style={{ borderColor: '#FAA307' }}>
+        <div className="bg-[#16162a] rounded-2xl border border-gray-800 overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="aspect-square flex items-center justify-center text-8xl" style={{ backgroundColor: '#FFF8F0' }}>
+            <div className="aspect-square bg-[#0f0f1a] flex items-center justify-center text-6xl">
               {product.images?.[0] ? (
                 <a href={product.images[0]} target="_blank" rel="noopener noreferrer">
-                  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition" />
+                  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover hover:opacity-90 transition" />
                 </a>
-              ) : '👗'}
+              ) : '📷'}
             </div>
 
             <div className="p-6 md:p-8 flex flex-col justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: '#E85D04' }}>{product.category || 'Fashion'}</p>
-                <h1 className="text-3xl font-black mb-4" style={{ color: '#370617' }}>{product.name}</h1>
+                <p className="text-xs font-bold text-orange-500 uppercase tracking-wide mb-2">{product.category || 'Fashion'}</p>
+                <h1 className="text-3xl font-bold text-white mb-4">{product.name}</h1>
+
+                {product.status === 'sold' && (
+                  <p className="text-sm text-red-400 font-bold mb-4">⚠️ This item has been sold</p>
+                )}
 
                 {product.showPrice !== false && product.price ? (
-                  <p className="text-3xl font-black mb-4" style={{ color: '#E85D04' }}>K{Number(product.price).toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-orange-500 mb-4">K{Number(product.price).toLocaleString()}</p>
                 ) : (
-                  <p className="text-lg mb-4" style={{ color: '#370617', opacity: 0.5 }}>Contact seller for price</p>
+                  <p className="text-lg text-gray-500 mb-4">Contact seller for price</p>
                 )}
 
                 {product.description && (
-                  <p className="mb-6 leading-relaxed" style={{ color: '#370617', opacity: 0.8 }}>{product.description}</p>
+                  <p className="mb-6 text-gray-400 leading-relaxed">{product.description}</p>
                 )}
 
-                <div className="rounded-2xl p-4 mb-6" style={{ backgroundColor: '#FFF8F0' }}>
-                  <p className="font-bold" style={{ color: '#370617' }}>Seller: {product.sellerName || 'Unknown'}</p>
+                <div className="bg-[#0f0f1a] rounded-xl p-4 mb-6 border border-gray-700">
+                  <p className="font-bold text-white">{product.sellerName || 'Unknown Seller'}</p>
+                  {product.sellerPhone && (
+                    <p className="text-sm text-gray-400 mt-1">📱 {product.sellerPhone}</p>
+                  )}
                 </div>
               </div>
 
-              {!isOwner && (
+              {!isOwner && product.status === 'active' && (
                 <div className="space-y-3">
                   {product.sellerPhone && (
-                    <button onClick={handleSmsChat} className="w-full text-white font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#E85D04' }}>
+                    <button onClick={handleSmsChat} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl transition">
                       💬 Chat (SMS)
                     </button>
                   )}
                   {product.hasWhatsapp && (product.whatsappNumber || product.sellerPhone) && (
-                    <button onClick={handleWhatsApp} className="w-full font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#25D366', color: 'white' }}>
+                    <button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition">
                       💚 Chat on WhatsApp
                     </button>
                   )}
@@ -102,7 +114,11 @@ export default function ProductPage() {
               )}
 
               {isOwner && (
-                <p className="text-center py-4 rounded-2xl" style={{ backgroundColor: '#FFF8F0', color: '#370617' }}>This is your product listing</p>
+                <div className="flex gap-3">
+                  <Link href={`/products/edit/${product.id}`} className="flex-1 text-center bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold py-3 rounded-xl hover:bg-orange-500/20 transition">
+                    ✏️ Edit Product
+                  </Link>
+                </div>
               )}
             </div>
           </div>

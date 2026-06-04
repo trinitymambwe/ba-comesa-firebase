@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { db, auth } from '@/lib/firebase'
-import { collection, getDocs, query, where, orderBy, doc, getDoc } from 'firebase/firestore'
+import { collection, getDocs, query, where, orderBy, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -33,6 +33,12 @@ export default function DashboardPage() {
     }
     fetchProducts()
   }, [user])
+
+  const markAsSold = async (productId: string) => {
+    await updateDoc(doc(db, 'products', productId), { status: 'sold' })
+    const snap = await getDocs(query(collection(db, 'products'), where('sellerId', '==', user.uid), orderBy('createdAt', 'desc')))
+    setProducts(snap.docs.map((d: any) => ({ id: d.id, ...d.data() })))
+  }
 
   if (!user) return null
 
@@ -67,15 +73,32 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {products.map((p: any) => (
-                  <Link key={p.id} href={`/products/${p.id}`} className="flex items-center gap-4 p-4 bg-[#0f0f1a] rounded-xl hover:border-gray-600 border border-gray-800 transition">
-                    <div className="w-14 h-14 rounded-lg bg-[#1a1a2e] flex items-center justify-center text-2xl overflow-hidden">
+                  <div key={p.id} className="flex items-center gap-4 p-4 bg-[#0f0f1a] rounded-xl border border-gray-800">
+                    <Link href={`/products/${p.id}`} className="w-14 h-14 rounded-lg bg-[#1a1a2e] flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">
                       {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : '📷'}
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/products/${p.id}`} className="font-bold text-white hover:text-orange-400">{p.name}</Link>
+                      <p className="text-xs text-gray-500">
+                        {p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'}
+                        <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                          p.status === 'sold' ? 'bg-red-500/20 text-red-400' :
+                          p.status === 'archived' ? 'bg-gray-500/20 text-gray-400' :
+                          'bg-green-500/20 text-green-400'
+                        }`}>{p.status}</span>
+                      </p>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-white">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'} · {p.status}</p>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {p.status === 'active' && (
+                        <button onClick={() => markAsSold(p.id)} className="text-xs bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 px-3 py-1 rounded-full hover:bg-yellow-500/20">
+                          Mark Sold
+                        </button>
+                      )}
+                      <Link href={`/products/edit/${p.id}`} className="text-xs bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1 rounded-full hover:bg-orange-500/20">
+                        Edit
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
