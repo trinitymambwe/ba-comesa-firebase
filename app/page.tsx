@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { db, auth } from '@/lib/firebase'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
@@ -12,6 +12,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({})
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -36,6 +37,24 @@ export default function HomePage() {
     p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const nextImage = (e: React.MouseEvent, productId: string, total: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setActiveImageIndex(prev => {
+      const current = prev[productId] || 0
+      return { ...prev, [productId]: (current + 1) % total }
+    })
+  }
+
+  const prevImage = (e: React.MouseEvent, productId: string, total: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setActiveImageIndex(prev => {
+      const current = prev[productId] || 0
+      return { ...prev, [productId]: (current - 1 + total) % total }
+    })
+  }
 
   if (!mounted) return null
 
@@ -121,43 +140,11 @@ export default function HomePage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '16px'
-            }}>
-              <div style={{
-                animation: 'bagFloat 1.2s ease-in-out infinite',
-                fontSize: '50px'
-              }}>
-                🛍️
-              </div>
-              <p style={{
-                color: '#f97316',
-                fontSize: '14px',
-                fontWeight: 'bold',
-                letterSpacing: '2px',
-                animation: 'pulseText 1.5s ease-in-out infinite'
-              }}>
-                Loading products...
-              </p>
-              <p style={{ color: '#6b7280', fontSize: '12px' }}>
-                <span style={{ color: '#f97316' }}>●</span> ba<span style={{ color: '#f97316' }}>Comesa</span>
-              </p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              <div style={{ animation: 'bagFloat 1.2s ease-in-out infinite', fontSize: '50px' }}>🛍️</div>
+              <p style={{ color: '#f97316', fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px' }}>Loading products...</p>
+              <p style={{ color: '#6b7280', fontSize: '12px' }}><span style={{ color: '#f97316' }}>●</span> ba<span style={{ color: '#f97316' }}>Comesa</span></p>
             </div>
-            <style jsx>{`
-              @keyframes bagFloat {
-                0% { transform: translateY(30px); opacity: 0; }
-                30% { opacity: 1; }
-                70% { opacity: 1; }
-                100% { transform: translateY(-30px); opacity: 0; }
-              }
-              @keyframes pulseText {
-                0%, 100% { opacity: 0.4; }
-                50% { opacity: 1; }
-              }
-            `}</style>
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20" style={{ color: '#9ca3af' }}>
@@ -167,25 +154,115 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map((p: any) => (
-              <Link key={p.id} href={`/products/${p.id}`} className="group rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
-                <div className="aspect-square flex items-center justify-center text-5xl relative overflow-hidden" style={{ backgroundColor: '#0d1b2a' }}>
-                  {p.images?.[0] ? (
-                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
-                  ) : (
-                    <span style={{ color: '#4b5563' }}>📷</span>
-                  )}
-                  {p.showPrice !== false && p.price && (
-                    <span className="absolute bottom-2 left-2 bg-black/70 text-orange-400 text-xs font-bold px-2 py-1 rounded">K{Number(p.price).toLocaleString()}</span>
-                  )}
-                </div>
-                <div className="p-3">
-                  <p className="text-xs text-orange-500 font-medium uppercase tracking-wide mb-1">{p.category || 'Fashion'}</p>
-                  <h3 className="text-sm font-semibold truncate" style={{ color: '#e0e0e0' }}>{p.name}</h3>
-                  <p style={{ color: '#9ca3af' }} className="text-xs mt-1">{p.sellerName || 'Unknown Seller'}</p>
-                </div>
-              </Link>
-            ))}
+            {filtered.map((p: any) => {
+              const images = p.images || []
+              const currentIdx = activeImageIndex[p.id] || 0
+              return (
+                <Link key={p.id} href={`/products/${p.id}`} className="group rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
+                  
+                  {/* IMAGE SECTION */}
+                  <div className="aspect-square relative overflow-hidden" style={{ backgroundColor: '#0d1b2a' }}>
+                    {images.length > 0 ? (
+                      <>
+                        <img src={images[currentIdx]} alt={p.name} className="w-full h-full object-cover" />
+                        
+                        {/* Left/Right Arrows */}
+                        {images.length > 1 && (
+                          <>
+                            <button
+                              onClick={(e) => prevImage(e, p.id, images.length)}
+                              style={{
+                                position: 'absolute',
+                                left: '4px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '28px',
+                                height: '28px',
+                                fontSize: '16px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 2,
+                              }}
+                            >
+                              ‹
+                            </button>
+                            <button
+                              onClick={(e) => nextImage(e, p.id, images.length)}
+                              style={{
+                                position: 'absolute',
+                                right: '4px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '28px',
+                                height: '28px',
+                                fontSize: '16px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 2,
+                              }}
+                            >
+                              ›
+                            </button>
+                            
+                            {/* Dots */}
+                            <div style={{
+                              position: 'absolute',
+                              bottom: '8px',
+                              left: '0',
+                              right: '0',
+                              display: 'flex',
+                              justifyContent: 'center',
+                              gap: '5px',
+                              zIndex: 2,
+                            }}>
+                              {images.map((_: string, i: number) => (
+                                <div
+                                  key={i}
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: i === currentIdx ? '#f97316' : 'rgba(255,255,255,0.5)',
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <span style={{ color: '#4b5563', fontSize: '3rem' }}>📷</span>
+                    )}
+
+                    {/* Price Tag */}
+                    {p.showPrice !== false && p.price && (
+                      <span className="absolute top-2 left-2 bg-black/70 text-orange-400 text-xs font-bold px-2 py-1 rounded z-10">
+                        K{Number(p.price).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* INFO */}
+                  <div className="p-3">
+                    <p className="text-xs text-orange-500 font-medium uppercase tracking-wide mb-1">{p.category || 'Fashion'}</p>
+                    <h3 className="text-sm font-semibold truncate" style={{ color: '#e0e0e0' }}>{p.name}</h3>
+                    <p style={{ color: '#9ca3af' }} className="text-xs mt-1">{p.sellerName || 'Unknown Seller'}</p>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         )}
       </section>
@@ -224,6 +301,15 @@ export default function HomePage() {
         <p style={{ color: '#6b7280' }}>Zambia's Fashion Marketplace</p>
         <p style={{ color: '#6b7280' }} className="mt-4">© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
       </footer>
+
+      <style jsx>{`
+        @keyframes bagFloat {
+          0% { transform: translateY(30px); opacity: 0; }
+          30% { opacity: 1; }
+          70% { opacity: 1; }
+          100% { transform: translateY(-30px); opacity: 0; }
+        }
+      `}</style>
     </div>
   )
 }
