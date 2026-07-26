@@ -265,9 +265,34 @@ export default function ProductPage() {
                   )}
                 </div>
               </div>
-
-              {!isOwner && product.status === 'active' && (
+{!isOwner && product.status === 'active' && (
                 <div className="space-y-3">
+                  <button 
+                    onClick={async () => {
+                      if (!user) { router.push('/auth/login'); return }
+                      const { addDoc, collection } = await import('firebase/firestore')
+                      await addDoc(collection(db, 'orders'), {
+                        productId: product.id,
+                        productName: product.name,
+                        productImage: product.images?.[0] || '',
+                        sellerId: product.sellerId,
+                        sellerName: product.sellerName,
+                        sellerPhone: product.sellerPhone,
+                        buyerId: user.uid,
+                        buyerEmail: user.email,
+                        price: product.price,
+                        deliveryRequested: true,
+                        deliveryStatus: 'pending',
+                        status: 'pending',
+                        createdAt: new Date().toISOString(),
+                      })
+                      alert('✅ Delivery requested! The seller will contact you.')
+                    }}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition"
+                  >
+                    🚴 Request Delivery
+                  </button>
+
                   {product.sellerPhone && (
                     <button onClick={handleSmsChat} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl transition">
                       💬 Chat (SMS)
