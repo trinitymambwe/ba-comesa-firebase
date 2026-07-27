@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { db, auth } from '@/lib/firebase'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
@@ -12,7 +12,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({})
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -25,7 +24,7 @@ export default function HomePage() {
   useEffect(() => {
     if (!mounted) return
     const fetchProducts = async () => {
-      const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(20))
+      const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(24))
       const snap = await getDocs(q)
       setProducts(snap.docs.map((d: any) => ({ id: d.id, ...d.data() })))
       setLoading(false)
@@ -38,278 +37,153 @@ export default function HomePage() {
     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const nextImage = (e: React.MouseEvent, productId: string, total: number) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setActiveImageIndex(prev => {
-      const current = prev[productId] || 0
-      return { ...prev, [productId]: (current + 1) % total }
-    })
-  }
-
-  const prevImage = (e: React.MouseEvent, productId: string, total: number) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setActiveImageIndex(prev => {
-      const current = prev[productId] || 0
-      return { ...prev, [productId]: (current - 1 + total) % total }
-    })
-  }
-
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0d1b2a', color: '#e0e0e0' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       {/* TOP BAR */}
-      <div style={{ backgroundColor: '#091420' }} className="text-xs px-4 py-2 flex justify-between">
-        <span style={{ color: '#9ca3af' }}>🇿🇲 Zambia's Fashion Marketplace</span>
-        <div className="flex gap-4">
+      <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>🇿🇲 Zambia's Fashion Marketplace</span>
+        <div style={{ display: 'flex', gap: '16px' }}>
           {user ? (
-            <span style={{ color: '#9ca3af' }}>Welcome, {user.email?.split('@')[0]}</span>
+            <span>Welcome, {user.email?.split('@')[0]}</span>
           ) : (
             <>
-              <Link href="/auth/login" style={{ color: '#9ca3af' }} className="hover:text-orange-400">Sign In</Link>
-              <Link href="/auth/signup" style={{ color: '#9ca3af' }} className="hover:text-orange-400">Sign Up</Link>
+              <Link href="/auth/login" style={{ color: 'white', textDecoration: 'none' }}>Sign In</Link>
+              <Link href="/auth/signup" style={{ color: 'white', textDecoration: 'none' }}>Sign Up</Link>
             </>
           )}
         </div>
       </div>
 
       {/* HEADER */}
-      <header style={{ backgroundColor: '#0a1628', borderBottom: '1px solid #1e3a5f' }} className="sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <Link href="/" className="text-2xl font-black tracking-tight flex items-center gap-2">
-            <span className="text-orange-500 text-3xl">●</span>
-            <span style={{ color: '#e0e0e0' }}>ba</span><span className="text-orange-500">Comesa</span>
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', position: 'sticky', top: 0, zIndex: 50, padding: '12px 20px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <Link href="/" style={{ fontSize: '26px', fontWeight: 900, color: '#e33124', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            baComesa
           </Link>
 
-          <div className="flex-1 max-w-2xl hidden md:block">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search products..."
-                style={{ backgroundColor: '#0d1b2a', border: '1px solid #1e3a5f', color: '#e0e0e0' }}
-                className="w-full rounded-full px-5 py-2.5 text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500"
-              />
-              <span className="absolute right-4 top-2.5 text-gray-500">🔍</span>
-            </div>
+          {/* Search */}
+          <div style={{ flex: 1, maxWidth: '600px', position: 'relative' }}>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search products..."
+              style={{
+                width: '100%', padding: '10px 16px', borderRadius: '20px', border: '2px solid #e33124',
+                outline: 'none', fontSize: '14px', boxSizing: 'border-box',
+              }}
+            />
+            <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#e33124', fontSize: '18px' }}>🔍</span>
           </div>
 
-          <nav className="flex items-center gap-4 text-sm">
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', whiteSpace: 'nowrap' }}>
             {user ? (
               <>
-                <Link href="/wishlist" style={{ color: '#9ca3af' }} className="hover:text-orange-400">♡ Wishlist</Link>
-                <Link href="/dashboard" className="bg-orange-500 text-white px-4 py-2 rounded-full font-bold hover:bg-orange-600 text-xs">Dashboard</Link>
-                <button onClick={() => signOut(auth)} style={{ color: '#9ca3af' }} className="hover:text-red-400 text-xs">Logout</button>
+                <Link href="/wishlist" style={{ color: '#333', textDecoration: 'none' }}>♡ Wishlist</Link>
+                <Link href="/dashboard" style={{ backgroundColor: '#e33124', color: 'white', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600 }}>Dashboard</Link>
+                <button onClick={() => signOut(auth)} style={{ color: '#999', background: 'none', border: 'none', cursor: 'pointer' }}>Logout</button>
               </>
             ) : (
-              <Link href="/auth/signup" className="bg-orange-500 text-white px-5 py-2 rounded-full font-bold hover:bg-orange-600 text-xs">Join Free</Link>
+              <Link href="/auth/signup" style={{ backgroundColor: '#e33124', color: 'white', padding: '8px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600 }}>Join Free</Link>
             )}
           </nav>
         </div>
       </header>
 
-      {/* HERO */}
-      <section style={{ backgroundColor: '#0a1628', borderBottom: '1px solid #1e3a5f' }}>
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-4xl md:text-6xl font-black mb-4" style={{ color: '#e0e0e0' }}>
-            Fashion & Accessories
-          </h1>
-          <p style={{ color: '#9ca3af' }} className="max-w-xl mx-auto mb-8">
-            Browse thousands of styles from local Zambian sellers. Chat directly, no online payments.
-          </p>
-          <div className="flex justify-center gap-3 flex-wrap">
-            <span style={{ backgroundColor: '#0d1b2a', border: '1px solid #1e3a5f', color: '#9ca3af' }} className="px-4 py-2 rounded-full text-sm">👗 Dresses</span>
-            <span style={{ backgroundColor: '#0d1b2a', border: '1px solid #1e3a5f', color: '#9ca3af' }} className="px-4 py-2 rounded-full text-sm">👟 Shoes</span>
-            <span style={{ backgroundColor: '#0d1b2a', border: '1px solid #1e3a5f', color: '#9ca3af' }} className="px-4 py-2 rounded-full text-sm">👜 Bags</span>
-            <span style={{ backgroundColor: '#0d1b2a', border: '1px solid #1e3a5f', color: '#9ca3af' }} className="px-4 py-2 rounded-full text-sm">💍 Accessories</span>
-          </div>
+      {/* CATEGORY BAR */}
+      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '8px 20px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '24px', fontSize: '13px', overflowX: 'auto' }}>
+          {['👗 Dresses', '👟 Shoes', '👜 Bags', '💍 Accessories', '👕 Tops', '👖 Pants', '🧥 Jackets', '🔥 Trending'].map(cat => (
+            <span key={cat} style={{ color: '#666', cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 500 }}>{cat}</span>
+          ))}
         </div>
-      </section>
+      </div>
+
+      {/* HERO */}
+      <div style={{ backgroundColor: 'white', margin: '12px 20px', borderRadius: '12px', overflow: 'hidden', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ background: 'linear-gradient(135deg, #e33124, #ff6600)', padding: '40px', textAlign: 'center', color: 'white' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: 900, marginBottom: '8px' }}>Fashion & Accessories</h1>
+          <p style={{ opacity: 0.9, fontSize: '16px' }}>Browse thousands of styles from Zambian sellers. Chat directly.</p>
+        </div>
+      </div>
 
       {/* PRODUCT GRID */}
-      <section className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold" style={{ color: '#e0e0e0' }}>🔥 Trending Now</h2>
-          {user && (
-            <Link href="/products/new" className="text-orange-400 text-sm hover:underline">+ Sell Something</Link>
-          )}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#333' }}>🔥 Trending Now</h2>
+          {user && <Link href="/products/new" style={{ color: '#e33124', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>+ Sell Something</Link>}
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              <div style={{ animation: 'bagFloat 1.2s ease-in-out infinite', fontSize: '50px' }}>🛍️</div>
-              <p style={{ color: '#f97316', fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px' }}>Loading products...</p>
-              <p style={{ color: '#6b7280', fontSize: '12px' }}><span style={{ color: '#f97316' }}>●</span> ba<span style={{ color: '#f97316' }}>Comesa</span></p>
-            </div>
+          <div style={{ textAlign: 'center', padding: '60px' }}>
+            <p style={{ fontSize: '40px', animation: 'bounce 1s infinite' }}>🛍️</p>
+            <p style={{ color: '#999', marginTop: '12px' }}>Loading products...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-20" style={{ color: '#9ca3af' }}>
-            <div style={{ fontSize: '60px', marginBottom: '16px' }}>🛍️</div>
-            <p className="text-lg">No products found</p>
-            <Link href="/products/new" className="text-orange-400 mt-2 inline-block">Be the first to sell →</Link>
+          <div style={{ textAlign: 'center', padding: '60px', backgroundColor: 'white', borderRadius: '12px' }}>
+            <p style={{ fontSize: '48px', marginBottom: '12px' }}>📦</p>
+            <p style={{ color: '#999', fontSize: '16px' }}>No products found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map((p: any) => {
-              const images = p.images || []
-              const currentIdx = activeImageIndex[p.id] || 0
-              return (
-                <Link key={p.id} href={`/products/${p.id}`} className="group rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
-                  
-                  {/* IMAGE SECTION */}
-                  <div className="aspect-square relative overflow-hidden" style={{ backgroundColor: '#0d1b2a' }}>
-                    {images.length > 0 ? (
-                      <>
-                        <img src={images[currentIdx]} alt={p.name} className="w-full h-full object-cover" />
-                        
-                        {/* Left/Right Arrows */}
-                        {images.length > 1 && (
-                          <>
-                            <button
-                              onClick={(e) => prevImage(e, p.id, images.length)}
-                              style={{
-                                position: 'absolute',
-                                left: '4px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                backgroundColor: 'rgba(0,0,0,0.5)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: '28px',
-                                height: '28px',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 2,
-                              }}
-                            >
-                              ‹
-                            </button>
-                            <button
-                              onClick={(e) => nextImage(e, p.id, images.length)}
-                              style={{
-                                position: 'absolute',
-                                right: '4px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                backgroundColor: 'rgba(0,0,0,0.5)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: '28px',
-                                height: '28px',
-                                fontSize: '16px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 2,
-                              }}
-                            >
-                              ›
-                            </button>
-                            
-                            {/* Dots */}
-                            <div style={{
-                              position: 'absolute',
-                              bottom: '8px',
-                              left: '0',
-                              right: '0',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              gap: '5px',
-                              zIndex: 2,
-                            }}>
-                              {images.map((_: string, i: number) => (
-                                <div
-                                  key={i}
-                                  style={{
-                                    width: '6px',
-                                    height: '6px',
-                                    borderRadius: '50%',
-                                    backgroundColor: i === currentIdx ? '#f97316' : 'rgba(255,255,255,0.5)',
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
+            {filtered.map((p: any) => (
+              <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
+                  border: '1px solid #eee', transition: 'box-shadow 0.2s',
+                  cursor: 'pointer',
+                }}
+                  onMouseEnter={(e: any) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)'}
+                  onMouseLeave={(e: any) => e.currentTarget.style.boxShadow = 'none'}
+                >
+                  {/* Image */}
+                  <div style={{ aspectRatio: '1', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                    {p.images?.[0] ? (
+                      <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <span style={{ color: '#4b5563', fontSize: '3rem' }}>📷</span>
+                      <span style={{ fontSize: '40px', color: '#ddd' }}>📷</span>
                     )}
-
-                    {/* Price Tag */}
                     {p.showPrice !== false && p.price && (
-                      <span className="absolute top-2 left-2 bg-black/70 text-orange-400 text-xs font-bold px-2 py-1 rounded z-10">
+                      <span style={{
+                        position: 'absolute', bottom: '8px', left: '8px',
+                        backgroundColor: 'rgba(0,0,0,0.7)', color: '#ff6600',
+                        padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 700,
+                      }}>
                         K{Number(p.price).toLocaleString()}
                       </span>
                     )}
                   </div>
 
-                  {/* INFO */}
-                  <div className="p-3">
-                    <p className="text-xs text-orange-500 font-medium uppercase tracking-wide mb-1">{p.category || 'Fashion'}</p>
-                    <h3 className="text-sm font-semibold truncate" style={{ color: '#e0e0e0' }}>{p.name}</h3>
-                    <p style={{ color: '#9ca3af' }} className="text-xs mt-1">{p.sellerName || 'Unknown Seller'}</p>
+                  {/* Info */}
+                  <div style={{ padding: '10px' }}>
+                    <p style={{ fontSize: '11px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
+                      {p.category || 'Fashion'}
+                    </p>
+                    <p style={{
+                      fontSize: '13px', color: '#333', fontWeight: 500,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      marginBottom: '4px',
+                    }}>
+                      {p.name}
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#999' }}>{p.sellerName || 'Unknown'}</p>
                   </div>
-                </Link>
-              )
-            })}
+                </div>
+              </Link>
+            ))}
           </div>
         )}
-      </section>
-
-      {/* FEATURES */}
-      <section style={{ backgroundColor: '#091420', borderTop: '1px solid #1e3a5f' }}>
-        <div className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <div className="text-3xl mb-3">🔒</div>
-            <h3 className="font-bold mb-1" style={{ color: '#e0e0e0' }}>No Online Payments</h3>
-            <p style={{ color: '#9ca3af' }} className="text-sm">Chat and deal directly with sellers</p>
-          </div>
-          <div>
-            <div className="text-3xl mb-3">💬</div>
-            <h3 className="font-bold mb-1" style={{ color: '#e0e0e0' }}>SMS & WhatsApp</h3>
-            <p style={{ color: '#9ca3af' }} className="text-sm">Contact sellers instantly</p>
-          </div>
-          <div>
-            <div className="text-3xl mb-3">🇿🇲</div>
-            <h3 className="font-bold mb-1" style={{ color: '#e0e0e0' }}>Local Zambian Sellers</h3>
-            <p style={{ color: '#9ca3af' }} className="text-sm">Support your community</p>
-          </div>
-          <div>
-            <div className="text-3xl mb-3">📸</div>
-            <h3 className="font-bold mb-1" style={{ color: '#e0e0e0' }}>Camera Upload</h3>
-            <p style={{ color: '#9ca3af' }} className="text-sm">Take photos or choose from gallery</p>
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* FOOTER */}
-      <footer style={{ backgroundColor: '#060f1a', borderTop: '1px solid #1e3a5f' }} className="py-10 text-center text-sm">
-        <p className="text-lg font-bold mb-2" style={{ color: '#e0e0e0' }}>
-          <span className="text-orange-500">●</span> ba<span className="text-orange-500">Comesa</span>
+      <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '24px', fontSize: '13px' }}>
+        <p style={{ color: 'white', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>
+          <span style={{ color: '#e33124' }}>ba</span>Comesa
         </p>
-        <p style={{ color: '#6b7280' }}>Zambia's Fashion Marketplace</p>
-        <p style={{ color: '#6b7280' }} className="mt-4">© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
       </footer>
-
-      <style jsx>{`
-        @keyframes bagFloat {
-          0% { transform: translateY(30px); opacity: 0; }
-          30% { opacity: 1; }
-          70% { opacity: 1; }
-          100% { transform: translateY(-30px); opacity: 0; }
-        }
-      `}</style>
     </div>
   )
 }
