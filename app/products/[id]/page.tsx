@@ -5,8 +5,7 @@ import { db, auth } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-
+import { useParams, useRouter } from 'next/navigation'
 export default function ProductPage() {
   const { id } = useParams()
   const [product, setProduct] = useState<any>(null)
@@ -15,12 +14,12 @@ export default function ProductPage() {
   const [mounted, setMounted] = useState(false)
   const [currentImage, setCurrentImage] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
-  const [fullscreenImage, setFullscreenImage] = useState(0)
-  const [zoom, setZoom] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const touchStartX = useRef(0)
-  const touchEndX = useRef(0)
-
+const [fullscreenImage, setFullscreenImage] = useState(0)
+const [zoom, setZoom] = useState(false)
+const scrollRef = useRef<HTMLDivElement>(null)
+const touchStartX = useRef(0)
+const touchEndX = useRef(0)
+const router = useRouter()
   useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
