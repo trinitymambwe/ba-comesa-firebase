@@ -36,7 +36,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!orderId) return
     const q = query(collection(db, 'messages'), orderBy('createdAt', 'asc'))
-    const unsub = onSnapshot(q, (snap) => {
+    const unsub = onSnapshot(q, (snap: any) => {
       const msgs = snap.docs
         .map((d: any) => ({ id: d.id, ...d.data() }))
         .filter((m: any) => m.orderId === orderId)
