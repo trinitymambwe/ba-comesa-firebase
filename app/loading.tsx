@@ -3,45 +3,34 @@
 export default function Loading() {
   return (
     <div style={{
-      backgroundColor: '#0d1b2a',
       minHeight: '100vh',
+      backgroundColor: '#ffffff',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '20px'
+      gap: '16px',
     }}>
-      <div style={{
-        animation: 'bagFloat 1.2s ease-in-out infinite',
-        fontSize: '60px'
-      }}>
-        🛍️
-      </div>
-
-      <p style={{
-        color: '#f97316',
-        fontSize: '18px',
-        fontWeight: 'bold',
+      <img 
+        src="https://i.imgur.com/geFkr2n.png" 
+        alt="ba Comesa" 
+        style={{ 
+          width: '100px',
+          animation: 'pulse 1.5s ease-in-out infinite',
+        }} 
+      />
+      <p style={{ 
+        color: '#e33124', 
+        fontWeight: 700, 
+        fontSize: '14px',
         letterSpacing: '2px',
-        animation: 'pulseText 1.5s ease-in-out infinite'
       }}>
-        Loading...
+        Style Meets Community
       </p>
-
-      <p style={{ color: '#9ca3af', fontSize: '14px', marginTop: '10px' }}>
-        <span style={{ color: '#f97316' }}>●</span> ba<span style={{ color: '#f97316' }}>Comesa</span>
-      </p>
-
       <style jsx>{`
-        @keyframes bagFloat {
-          0% { transform: translateY(40px); opacity: 0; }
-          30% { opacity: 1; }
-          70% { opacity: 1; }
-          100% { transform: translateY(-40px); opacity: 0; }
-        }
-        @keyframes pulseText {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 1; }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.08); opacity: 1; }
         }
       `}</style>
     </div>
