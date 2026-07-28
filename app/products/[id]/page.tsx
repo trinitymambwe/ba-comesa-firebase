@@ -19,6 +19,11 @@ export default function ProductPage() {
   const [fullscreenImage, setFullscreenImage] = useState(0)
   const [zoom, setZoom] = useState(false)
   const [deliveryRequested, setDeliveryRequested] = useState(false)
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false)
+  const [deliveryName, setDeliveryName] = useState('')
+  const [deliveryPhone, setDeliveryPhone] = useState('')
+  const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [deliveryLocation, setDeliveryLocation] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
@@ -38,31 +43,25 @@ export default function ProductPage() {
     fetchProduct()
   }, [id, mounted])
 
-  const handleSmsChat = () => {
-    if (!product?.sellerPhone) return
-    const msg = encodeURIComponent(`Hi, I'm interested in "${product.name}" on ba Comesa`)
-    window.location.href = `sms:${product.sellerPhone}?body=${msg}`
-  }
-
-  const handleWhatsApp = () => {
-    const num = (product?.whatsappNumber || product?.sellerPhone || '').replace(/[\+\s]/g, '')
-    const msg = encodeURIComponent(`Hi, I'm interested in "${product.name}" on ba Comesa`)
-    window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
-  }
-
   const handleDeliveryRequest = async () => {
     if (!user) { router.push('/auth/login'); return }
+    if (!deliveryName || !deliveryPhone || !deliveryAddress) {
+      alert('Please fill in all delivery details')
+      return
+    }
     await addDoc(collection(db, 'orders'), {
       productId: product.id, productName: product.name,
       productImage: product.images?.[0] || '',
       sellerId: product.sellerId, sellerName: product.sellerName,
-      sellerPhone: product.sellerPhone,
       buyerId: user.uid, buyerEmail: user.email,
+      buyerName: deliveryName, buyerPhone: deliveryPhone,
+      deliveryAddress, deliveryLocation,
       price: product.price, deliveryRequested: true,
       deliveryStatus: 'pending', status: 'pending',
       createdAt: new Date().toISOString(),
     })
     setDeliveryRequested(true)
+    setShowDeliveryForm(false)
     setTimeout(() => setDeliveryRequested(false), 3000)
   }
 
@@ -86,24 +85,20 @@ export default function ProductPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      {/* Top Bar */}
       <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between' }}>
         <Link href="/" style={{ color: 'white', textDecoration: 'none' }}>← Back to Marketplace</Link>
         <span>{product.category || 'Fashion'}</span>
       </div>
 
-      {/* Header */}
       <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '10px 20px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <Link href="/"><img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px' }} /></Link>
         </div>
       </header>
 
-      {/* Main Content */}
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
         <div style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
           
-          {/* Images */}
           <div style={{ flex: 1, backgroundColor: '#fafafa', position: 'relative' }}>
             {images.length > 0 ? (
               <>
@@ -136,7 +131,6 @@ export default function ProductPage() {
             )}
           </div>
 
-          {/* Product Info */}
           <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '12px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>{product.category || 'Fashion'}</p>
             <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#333', marginBottom: '12px', lineHeight: 1.3 }}>{product.name}</h1>
@@ -153,25 +147,16 @@ export default function ProductPage() {
 
             {product.description && <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>{product.description}</p>}
 
-            {/* Seller Card */}
             <div style={{ backgroundColor: '#fafafa', borderRadius: '10px', padding: '14px', marginBottom: '20px', border: '1px solid #eee' }}>
-              <p style={{ fontWeight: 600, color: '#333', fontSize: '14px', marginBottom: '4px' }}>{product.sellerName || 'Unknown Seller'}</p>
-              {product.sellerPhone && <p style={{ color: '#666', fontSize: '13px' }}>📱 {product.sellerPhone}</p>}
+              <p style={{ fontWeight: 600, color: '#333', fontSize: '14px' }}>{product.sellerName || 'Unknown Seller'}</p>
             </div>
 
-            {/* Action Buttons */}
             {!isOwner && product.status === 'active' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
-                <button onClick={handleDeliveryRequest}
+                <button onClick={() => setShowDeliveryForm(true)}
                   style={{ backgroundColor: deliveryRequested ? '#00c853' : '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}>
-                  {deliveryRequested ? '✅ Delivery Requested!' : '🚴 Request Delivery'}
+                  {deliveryRequested ? '✅ Delivery Requested!' : '❤️ Love This? Get It Delivered'}
                 </button>
-                {product.sellerPhone && (
-                  <button onClick={handleSmsChat} style={{ backgroundColor: 'white', border: '2px solid #e33124', color: '#e33124', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>💬 Chat via SMS</button>
-                )}
-                {product.hasWhatsapp && (product.whatsappNumber || product.sellerPhone) && (
-                  <button onClick={handleWhatsApp} style={{ backgroundColor: '#25D366', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>💚 Chat on WhatsApp</button>
-                )}
               </div>
             )}
 
@@ -184,7 +169,36 @@ export default function ProductPage() {
         </div>
       </div>
 
-      {/* Fullscreen Overlay */}
+      {/* Delivery Form Modal */}
+      {showDeliveryForm && (
+        <div onClick={() => setShowDeliveryForm(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#333', marginBottom: '20px' }}>📍 Delivery Details</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input type="text" value={deliveryName} onChange={(e) => setDeliveryName(e.target.value)} placeholder="Full Name" style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }} />
+              <input type="tel" value={deliveryPhone} onChange={(e) => setDeliveryPhone(e.target.value)} placeholder="Phone Number" style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }} />
+              <input type="text" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Delivery Address" style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px' }} />
+              <select value={deliveryLocation} onChange={(e) => setDeliveryLocation(e.target.value)} style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', backgroundColor: 'white' }}>
+                <option value="">Select Location</option>
+                <option value="Lusaka CBD">Lusaka CBD</option>
+                <option value="Lusaka East">Lusaka East</option>
+                <option value="Lusaka West">Lusaka West</option>
+                <option value="Lusaka North">Lusaka North</option>
+                <option value="Lusaka South">Lusaka South</option>
+                <option value="Kitwe">Kitwe</option>
+                <option value="Ndola">Ndola</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <button onClick={() => setShowDeliveryForm(false)} style={{ flex: 1, padding: '12px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: 'white', color: '#666', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleDeliveryRequest} style={{ flex: 2, padding: '12px', border: 'none', borderRadius: '8px', backgroundColor: '#e33124', color: 'white', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>Confirm Delivery Request</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen */}
       {fullscreen && (
         <div onClick={() => { setFullscreen(false); setZoom(false) }} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.96)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <button onClick={() => { setFullscreen(false); setZoom(false) }} style={{ position: 'absolute', top: '16px', right: '16px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontSize: '20px', cursor: 'pointer', zIndex: 201 }}>✕</button>
