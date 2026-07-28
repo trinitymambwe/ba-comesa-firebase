@@ -6,6 +6,7 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles, Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp } from 'lucide-react'
+import { useTheme } from '@/components/ThemeSwitcher'
 
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
@@ -18,12 +19,14 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
 
-  const bgColor = '#0d1b2a'
-  const cardBg = '#0a1628'
-  const accent = '#e85d04'
-  const textColor = '#e0e0e0'
-  const mutedText = '#9ca3af'
-  const borderColor = '#1e3a5f'
+  const { theme } = useTheme()
+
+  const bgColor = theme.bg
+  const cardBg = theme.card
+  const accent = theme.accent
+  const textColor = theme.text
+  const mutedText = theme.muted
+  const borderColor = theme.border
 
   useEffect(() => {
     setMounted(true)
@@ -237,7 +240,7 @@ export default function HomePage() {
                   <div style={{
                     backgroundColor: cardBg, borderRadius: '8px', overflow: 'hidden',
                     border: isHovered ? `1px solid ${accent}` : `1px solid ${borderColor}`,
-                    boxShadow: isHovered ? `0 8px 30px rgba(232,93,4,0.15)` : 'none',
+                    boxShadow: isHovered ? `0 8px 30px ${accent}15` : 'none',
                     transition: 'all 0.3s ease', transform: isHovered ? 'translateY(-4px)' : 'none', position: 'relative',
                   }}>
                     <div style={{ aspectRatio: '1', backgroundColor: bgColor, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
@@ -286,6 +289,11 @@ export default function HomePage() {
             <User size={20} /> <div>Account</div>
           </Link>
         </div>
+      )}
+
+      {/* THEME SWITCHER */}
+      {typeof window !== 'undefined' && (
+        <ThemeSwitcher />
       )}
 
       {!isMobile && (
