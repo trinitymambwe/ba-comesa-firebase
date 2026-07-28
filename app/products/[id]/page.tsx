@@ -2,26 +2,26 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { db, auth } from '@/lib/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, addDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
+
 export default function ProductPage() {
   const { id } = useParams()
+  const router = useRouter()
   const [product, setProduct] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [currentImage, setCurrentImage] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
-const [fullscreenImage, setFullscreenImage] = useState(0)
-const [zoom, setZoom] = useState(false)
-const scrollRef = useRef<HTMLDivElement>(null)
-const touchStartX = useRef(0)
-const touchEndX = useRef(0)
-const router = useRouter()
-  useEffect(() => { setMounted(true) }, [])
+  const [fullscreenImage, setFullscreenImage] = useState(0)
+  const [zoom, setZoom] = useState(false)
+  const [deliveryRequested, setDeliveryRequested] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => { setMounted(true) }, [])
   useEffect(() => {
     if (!mounted) return
     const unsub = onAuthStateChanged(auth, (u: any) => setUser(u))
@@ -40,385 +40,171 @@ const router = useRouter()
 
   const handleSmsChat = () => {
     if (!product?.sellerPhone) return
-    const msg = encodeURIComponent(`Hi, I'm interested in your "${product.name}" listed on ba Comesa Marketplace`)
+    const msg = encodeURIComponent(`Hi, I'm interested in "${product.name}" on ba Comesa`)
     window.location.href = `sms:${product.sellerPhone}?body=${msg}`
   }
 
   const handleWhatsApp = () => {
     const num = (product?.whatsappNumber || product?.sellerPhone || '').replace(/[\+\s]/g, '')
-    const msg = encodeURIComponent(`Hi, I'm interested in your "${product.name}" listed on ba Comesa Marketplace`)
+    const msg = encodeURIComponent(`Hi, I'm interested in "${product.name}" on ba Comesa`)
     window.open(`https://wa.me/${num}?text=${msg}`, '_blank')
   }
 
-  const scrollToImage = (index: number) => {
-    if (scrollRef.current) {
-      const children = scrollRef.current.children
-      if (children[index]) {
-        children[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-        setCurrentImage(index)
-      }
-    }
+  const handleDeliveryRequest = async () => {
+    if (!user) { router.push('/auth/login'); return }
+    await addDoc(collection(db, 'orders'), {
+      productId: product.id, productName: product.name,
+      productImage: product.images?.[0] || '',
+      sellerId: product.sellerId, sellerName: product.sellerName,
+      sellerPhone: product.sellerPhone,
+      buyerId: user.uid, buyerEmail: user.email,
+      price: product.price, deliveryRequested: true,
+      deliveryStatus: 'pending', status: 'pending',
+      createdAt: new Date().toISOString(),
+    })
+    setDeliveryRequested(true)
+    setTimeout(() => setDeliveryRequested(false), 3000)
   }
 
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      const scrollLeft = scrollRef.current.scrollLeft
-      const itemWidth = scrollRef.current.offsetWidth
-      const index = Math.round(scrollLeft / itemWidth)
+  const scrollToImage = (index: number) => {
+    if (scrollRef.current && scrollRef.current.children[index]) {
+      scrollRef.current.children[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
       setCurrentImage(index)
     }
   }
 
-  const openFullscreen = (index: number) => {
-    setFullscreenImage(index)
-    setFullscreen(true)
-    document.body.style.overflow = 'hidden'
-  }
-
-  const closeFullscreen = () => {
-    setFullscreen(false)
-    setZoom(false)
-    document.body.style.overflow = 'auto'
-  }
-
-  const nextFullscreenImage = () => {
-    setZoom(false)
-    setFullscreenImage(prev => (prev + 1) % (product.images || []).length)
-  }
-
-  const prevFullscreenImage = () => {
-    setZoom(false)
-    const images = product.images || []
-    setFullscreenImage(prev => (prev - 1 + images.length) % images.length)
-  }
-
-  const toggleZoom = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setZoom(!zoom)
-  }
-
-  // Touch handling for swipe vs tap
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent, index: number) => {
-    touchEndX.current = e.changedTouches[0].clientX
-    const diff = touchStartX.current - touchEndX.current
-    // Only open fullscreen if it was a tap (minimal swipe)
-    if (Math.abs(diff) < 10) {
-      openFullscreen(index)
-    }
-  }
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (!fullscreen) return
-      if (e.key === 'Escape') closeFullscreen()
-      if (e.key === 'ArrowRight') nextFullscreenImage()
-      if (e.key === 'ArrowLeft') prevFullscreenImage()
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [fullscreen, product])
-
   if (!mounted || loading) return (
-    <div className="min-h-screen bg-[#0d1b2a] flex items-center justify-center">
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ animation: 'bagFloat 1.2s ease-in-out infinite', fontSize: '50px' }}>🛍️</div>
-        <p style={{ color: '#f97316', fontWeight: 'bold', marginTop: '10px' }}>Loading...</p>
-      </div>
-      <style jsx>{`
-        @keyframes bagFloat {
-          0% { transform: translateY(30px); opacity: 0; }
-          30% { opacity: 1; }
-          70% { opacity: 1; }
-          100% { transform: translateY(-30px); opacity: 0; }
-        }
-      `}</style>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
     </div>
   )
 
-  if (!product) return <div className="min-h-screen bg-[#0d1b2a] flex items-center justify-center text-white">Product not found</div>
+  if (!product) return <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>Product not found</div>
 
   const isOwner = user?.uid === product.sellerId
   const images = product.images || []
 
   return (
-    <div className="min-h-screen bg-[#0d1b2a] text-gray-200">
-      <header className="bg-[#0a1628] border-b border-[#1e3a5f] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-xl font-black">
-            <span className="text-orange-500">●</span> <span style={{ color: '#e0e0e0' }}>ba</span><span className="text-orange-500">Comesa</span>
-          </Link>
-          <Link href="/" style={{ color: '#9ca3af' }} className="hover:text-white text-sm">← Back</Link>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      {/* Top Bar */}
+      <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between' }}>
+        <Link href="/" style={{ color: 'white', textDecoration: 'none' }}>← Back to Marketplace</Link>
+        <span>{product.category || 'Fashion'}</span>
+      </div>
+
+      {/* Header */}
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '10px 20px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <Link href="/"><img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px' }} /></Link>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-0 md:px-4 py-0 md:py-8">
-        <div className="bg-[#0a1628] md:rounded-2xl border-0 md:border border-[#1e3a5f] overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            
-            {/* IMAGE GALLERY */}
-            <div className="relative bg-black select-none">
-              {images.length > 0 ? (
-                <>
-                  <div 
-                    ref={scrollRef}
-                    onScroll={handleScroll}
-                    className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-                    style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}
-                  >
-                    {images.map((img: string, index: number) => (
-                      <div 
-                        key={index} 
-                        className="min-w-full snap-center flex items-center justify-center relative group"
-                        style={{ aspectRatio: '1/1' }}
-                        onClick={() => openFullscreen(index)}
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={(e) => handleTouchEnd(e, index)}
-                      >
-                        <img 
-                          src={img} 
-                          alt={`${product.name} - ${index + 1}`} 
-                          className="w-full h-full object-contain pointer-events-none"
-                          draggable={false}
-                        />
-                        {/* Tap to expand hint */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                          <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium pointer-events-none">
-                            🔍 Tap to expand
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {images.length > 1 && (
-                    <>
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-                        {images.map((_: string, index: number) => (
-                          <button
-                            key={index}
-                            onClick={(e) => { e.stopPropagation(); scrollToImage(index) }}
-                            style={{
-                              width: currentImage === index ? '20px' : '8px',
-                              height: '8px',
-                              borderRadius: '10px',
-                              backgroundColor: currentImage === index ? '#f97316' : 'rgba(255,255,255,0.4)',
-                              border: 'none',
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease',
-                            }}
-                          />
-                        ))}
-                      </div>
-
-                      <button onClick={(e) => { e.stopPropagation(); scrollToImage(Math.max(0, currentImage - 1)) }}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-9 h-9 flex items-center justify-center text-xl z-10 hover:bg-black/70">
-                        ‹
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); scrollToImage(Math.min(images.length - 1, currentImage + 1)) }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-9 h-9 flex items-center justify-center text-xl z-10 hover:bg-black/70">
-                        ›
-                      </button>
-                    </>
-                  )}
-
-                  <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
-                    {currentImage + 1} / {images.length}
-                  </div>
-                </>
-              ) : (
-                <div className="aspect-square flex items-center justify-center text-6xl bg-[#0d1b2a]">
-                  <span style={{ color: '#4b5563' }}>📷</span>
+      {/* Main Content */}
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
+        <div style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
+          
+          {/* Images */}
+          <div style={{ flex: 1, backgroundColor: '#fafafa', position: 'relative' }}>
+            {images.length > 0 ? (
+              <>
+                <div ref={scrollRef} style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
+                  {images.map((img: string, i: number) => (
+                    <div key={i} style={{ minWidth: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      onClick={() => { setFullscreenImage(i); setFullscreen(true) }}>
+                      <img src={img} alt={`${product.name} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
-
-            {/* PRODUCT DETAILS */}
-            <div className="p-6 md:p-8 flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-bold text-orange-500 uppercase tracking-wide mb-2">{product.category || 'Fashion'}</p>
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">{product.name}</h1>
-
-                {product.status === 'sold' && (
-                  <p className="text-sm text-red-400 font-bold mb-4">⚠️ This item has been sold</p>
+                {images.length > 1 && (
+                  <>
+                    <div style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
+                      {images.map((_: string, i: number) => (
+                        <button key={i} onClick={() => scrollToImage(i)} style={{
+                          width: currentImage === i ? '18px' : '7px', height: '7px', borderRadius: '10px',
+                          border: 'none', cursor: 'pointer', backgroundColor: currentImage === i ? '#e33124' : '#ccc', transition: 'all 0.3s',
+                        }} />
+                      ))}
+                    </div>
+                    <button onClick={() => scrollToImage(Math.max(0, currentImage - 1))} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '18px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>‹</button>
+                    <button onClick={() => scrollToImage(Math.min(images.length - 1, currentImage + 1))} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '18px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>›</button>
+                  </>
                 )}
+                <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{currentImage + 1}/{images.length}</div>
+              </>
+            ) : (
+              <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ddd', fontSize: '48px' }}>📷</div>
+            )}
+          </div>
 
-                {product.showPrice !== false && product.price ? (
-                  <p className="text-3xl font-bold text-orange-500 mb-4">K{Number(product.price).toLocaleString()}</p>
-                ) : (
-                  <p className="text-lg text-gray-500 mb-4">Contact seller for price</p>
-                )}
+          {/* Product Info */}
+          <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <p style={{ fontSize: '12px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>{product.category || 'Fashion'}</p>
+            <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#333', marginBottom: '12px', lineHeight: 1.3 }}>{product.name}</h1>
 
-                {product.description && (
-                  <p className="mb-6 text-gray-400 leading-relaxed">{product.description}</p>
-                )}
+            {product.status === 'sold' && <p style={{ color: '#e33124', fontWeight: 600, fontSize: '14px', marginBottom: '12px' }}>⚠️ This item has been sold</p>}
 
-                <div className="bg-[#0d1b2a] rounded-xl p-4 mb-6 border border-[#1e3a5f]">
-                  <p className="font-bold text-white">{product.sellerName || 'Unknown Seller'}</p>
-                  {product.sellerPhone && (
-                    <p className="text-sm text-gray-400 mt-1">📱 {product.sellerPhone}</p>
-                  )}
-                </div>
+            {product.showPrice !== false && product.price ? (
+              <div style={{ marginBottom: '16px' }}>
+                <span style={{ fontSize: '28px', fontWeight: 700, color: '#e33124' }}>K{Number(product.price).toLocaleString()}</span>
               </div>
-{!isOwner && product.status === 'active' && (
-                <div className="space-y-3">
-                  <button 
-                    onClick={async () => {
-                      if (!user) { router.push('/auth/login'); return }
-                      const { addDoc, collection } = await import('firebase/firestore')
-                      await addDoc(collection(db, 'orders'), {
-                        productId: product.id,
-                        productName: product.name,
-                        productImage: product.images?.[0] || '',
-                        sellerId: product.sellerId,
-                        sellerName: product.sellerName,
-                        sellerPhone: product.sellerPhone,
-                        buyerId: user.uid,
-                        buyerEmail: user.email,
-                        price: product.price,
-                        deliveryRequested: true,
-                        deliveryStatus: 'pending',
-                        status: 'pending',
-                        createdAt: new Date().toISOString(),
-                      })
-                      alert('✅ Delivery requested! The seller will contact you.')
-                    }}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition"
-                  >
-                    🚴 Request Delivery
-                  </button>
+            ) : (
+              <p style={{ color: '#999', marginBottom: '16px' }}>Contact seller for price</p>
+            )}
 
-                  {product.sellerPhone && (
-                    <button onClick={handleSmsChat} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl transition">
-                      💬 Chat (SMS)
-                    </button>
-                  )}
-                  {product.hasWhatsapp && (product.whatsappNumber || product.sellerPhone) && (
-                    <button onClick={handleWhatsApp} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition">
-                      💚 Chat on WhatsApp
-                    </button>
-                  )}
-                </div>
-              )}
+            {product.description && <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>{product.description}</p>}
 
-              {isOwner && (
-                <Link href={`/products/edit/${product.id}`} className="text-center bg-orange-500/10 border border-orange-500/30 text-orange-400 font-bold py-3 rounded-xl hover:bg-orange-500/20 transition">
-                  ✏️ Edit Product
-                </Link>
-              )}
+            {/* Seller Card */}
+            <div style={{ backgroundColor: '#fafafa', borderRadius: '10px', padding: '14px', marginBottom: '20px', border: '1px solid #eee' }}>
+              <p style={{ fontWeight: 600, color: '#333', fontSize: '14px', marginBottom: '4px' }}>{product.sellerName || 'Unknown Seller'}</p>
+              {product.sellerPhone && <p style={{ color: '#666', fontSize: '13px' }}>📱 {product.sellerPhone}</p>}
             </div>
+
+            {/* Action Buttons */}
+            {!isOwner && product.status === 'active' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
+                <button onClick={handleDeliveryRequest}
+                  style={{ backgroundColor: deliveryRequested ? '#00c853' : '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}>
+                  {deliveryRequested ? '✅ Delivery Requested!' : '🚴 Request Delivery'}
+                </button>
+                {product.sellerPhone && (
+                  <button onClick={handleSmsChat} style={{ backgroundColor: 'white', border: '2px solid #e33124', color: '#e33124', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>💬 Chat via SMS</button>
+                )}
+                {product.hasWhatsapp && (product.whatsappNumber || product.sellerPhone) && (
+                  <button onClick={handleWhatsApp} style={{ backgroundColor: '#25D366', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>💚 Chat on WhatsApp</button>
+                )}
+              </div>
+            )}
+
+            {isOwner && (
+              <Link href={`/products/edit/${product.id}`} style={{ marginTop: 'auto', textAlign: 'center', backgroundColor: '#fff5f5', border: '1px solid #e33124', color: '#e33124', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 600, textDecoration: 'none' }}>
+                ✏️ Edit Product
+              </Link>
+            )}
           </div>
         </div>
-      </main>
+      </div>
 
-      {/* FULLSCREEN OVERLAY */}
+      {/* Fullscreen Overlay */}
       {fullscreen && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.96)',
-            zIndex: 200,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            animation: 'fadeIn 0.3s ease',
-          }}
-          onClick={closeFullscreen}
-        >
-          {/* Close */}
-          <button onClick={closeFullscreen}
-            className="absolute top-4 right-4 bg-white/10 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl z-50 hover:bg-white/20 backdrop-blur">
-            ✕
-          </button>
-
-          {/* Counter */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/10 text-white px-4 py-1.5 rounded-full text-sm font-bold z-50 backdrop-blur">
-            {fullscreenImage + 1} / {images.length}
+        <div onClick={() => { setFullscreen(false); setZoom(false) }} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.96)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={() => { setFullscreen(false); setZoom(false) }} style={{ position: 'absolute', top: '16px', right: '16px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontSize: '20px', cursor: 'pointer', zIndex: 201 }}>✕</button>
+          <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', color: 'white', fontSize: '14px', fontWeight: 600, backgroundColor: 'rgba(0,0,0,0.5)', padding: '4px 14px', borderRadius: '12px' }}>{fullscreenImage + 1}/{images.length}</div>
+          <div onClick={(e) => { e.stopPropagation(); setZoom(!zoom) }} style={{ cursor: zoom ? 'zoom-out' : 'zoom-in', transform: zoom ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.4s cubic-bezier(0.25,0.8,0.25,1.2)', maxWidth: '90vw', maxHeight: '80vh' }}>
+            <img src={images[fullscreenImage]} alt="" style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '8px' }} />
           </div>
-
-          {/* Image */}
-          <div 
-            onClick={toggleZoom}
-            style={{
-              cursor: zoom ? 'zoom-out' : 'zoom-in',
-              transform: zoom ? 'scale(2.5)' : 'scale(1)',
-              transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.2)',
-              maxWidth: '90vw',
-              maxHeight: '80vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 201,
-            }}
-          >
-            <img 
-              src={images[fullscreenImage]} 
-              alt={`${product.name} - ${fullscreenImage + 1}`}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                objectFit: 'contain',
-                borderRadius: '12px',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-              }}
-              draggable={false}
-            />
-          </div>
-
-          {/* Arrows */}
           {images.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); prevFullscreenImage() }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl z-50 hover:bg-white/20 backdrop-blur">
-                ‹
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); nextFullscreenImage() }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl z-50 hover:bg-white/20 backdrop-blur">
-                ›
-              </button>
+              <button onClick={(e) => { e.stopPropagation(); setZoom(false); setFullscreenImage(prev => (prev - 1 + images.length) % images.length) }} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '50%', width: '44px', height: '44px', fontSize: '24px', cursor: 'pointer' }}>‹</button>
+              <button onClick={(e) => { e.stopPropagation(); setZoom(false); setFullscreenImage(prev => (prev + 1) % images.length) }} style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '50%', width: '44px', height: '44px', fontSize: '24px', cursor: 'pointer' }}>›</button>
             </>
-          )}
-
-          {/* Thumbnails */}
-          {images.length > 1 && (
-            <div className="absolute bottom-6 flex gap-2 z-50" onClick={(e) => e.stopPropagation()}>
-              {images.map((img: string, i: number) => (
-                <div
-                  key={i}
-                  onClick={() => { setZoom(false); setFullscreenImage(i) }}
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    border: i === fullscreenImage ? '2px solid #f97316' : '2px solid transparent',
-                    opacity: i === fullscreenImage ? 1 : 0.5,
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} draggable={false} />
-                </div>
-              ))}
-            </div>
           )}
         </div>
       )}
 
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      `}</style>
+      <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '16px', fontSize: '12px', marginTop: '40px' }}>
+        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
+        <p>© {new Date().getFullYear()} ba Comesa Marketplace</p>
+      </footer>
     </div>
   )
 }
