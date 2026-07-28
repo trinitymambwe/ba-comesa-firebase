@@ -11,9 +11,15 @@ export default function HomePage() {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [logoDone, setLogoDone] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLogoDone(true), 2000)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     if (!mounted) return
@@ -39,11 +45,44 @@ export default function HomePage() {
 
   if (!mounted) return null
 
+  // LOGO SPLASH SCREEN
+  if (!logoDone) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <img 
+          src="https://i.imgur.com/geFkr2n.png" 
+          alt="ba Comesa" 
+          style={{ 
+            width: '180px', 
+            marginBottom: '20px',
+            animation: 'pulseLogo 1.5s ease-in-out infinite',
+          }} 
+        />
+        <p style={{ color: '#e33124', fontWeight: 700, fontSize: '16px', letterSpacing: '2px' }}>
+          Style Meets Community
+        </p>
+        <style jsx>{`
+          @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       {/* TOP BAR */}
       <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span>🇿🇲 Zambia's Fashion Marketplace</span>
+        <span>Zambia's Fashion Marketplace</span>
         <div style={{ display: 'flex', gap: '16px' }}>
           {user ? (
             <span>Welcome, {user.email?.split('@')[0]}</span>
@@ -59,8 +98,8 @@ export default function HomePage() {
       {/* HEADER */}
       <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', position: 'sticky', top: 0, zIndex: 50, padding: '12px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <Link href="/" style={{ fontSize: '26px', fontWeight: 900, color: '#e33124', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            baComesa
+          <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
+            <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '32px' }} />
           </Link>
 
           {/* Search */}
@@ -95,7 +134,7 @@ export default function HomePage() {
       {/* CATEGORY BAR */}
       <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '8px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '24px', fontSize: '13px', overflowX: 'auto' }}>
-          {['👗 Dresses', '👟 Shoes', '👜 Bags', '💍 Accessories', '👕 Tops', '👖 Pants', '🧥 Jackets', '🔥 Trending'].map(cat => (
+          {['Dresses', 'Shoes', 'Bags', 'Accessories', 'Tops', 'Pants', 'Jackets', 'Trending'].map(cat => (
             <span key={cat} style={{ color: '#666', cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 500 }}>{cat}</span>
           ))}
         </div>
@@ -112,18 +151,17 @@ export default function HomePage() {
       {/* PRODUCT GRID */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#333' }}>🔥 Trending Now</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#333' }}>Trending Now</h2>
           {user && <Link href="/products/new" style={{ color: '#e33124', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>+ Sell Something</Link>}
         </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px' }}>
-            <p style={{ fontSize: '40px', animation: 'bounce 1s infinite' }}>🛍️</p>
+            <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '80px', opacity: 0.5, animation: 'pulseLogo 1.5s ease-in-out infinite' }} />
             <p style={{ color: '#999', marginTop: '12px' }}>Loading products...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', backgroundColor: 'white', borderRadius: '12px' }}>
-            <p style={{ fontSize: '48px', marginBottom: '12px' }}>📦</p>
             <p style={{ color: '#999', fontSize: '16px' }}>No products found</p>
           </div>
         ) : (
@@ -138,12 +176,11 @@ export default function HomePage() {
                   onMouseEnter={(e: any) => e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)'}
                   onMouseLeave={(e: any) => e.currentTarget.style.boxShadow = 'none'}
                 >
-                  {/* Image */}
                   <div style={{ aspectRatio: '1', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                     {p.images?.[0] ? (
                       <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <span style={{ fontSize: '40px', color: '#ddd' }}>📷</span>
+                      <img src="https://i.imgur.com/geFkr2n.png" alt="No image" style={{ width: '50%', opacity: 0.2 }} />
                     )}
                     {p.showPrice !== false && p.price && (
                       <span style={{
@@ -155,8 +192,6 @@ export default function HomePage() {
                       </span>
                     )}
                   </div>
-
-                  {/* Info */}
                   <div style={{ padding: '10px' }}>
                     <p style={{ fontSize: '11px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
                       {p.category || 'Fashion'}
@@ -179,11 +214,16 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '24px', fontSize: '13px' }}>
-        <p style={{ color: 'white', fontWeight: 700, fontSize: '16px', marginBottom: '8px' }}>
-          <span style={{ color: '#e33124' }}>ba</span>Comesa
-        </p>
+        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px', marginBottom: '8px' }} />
         <p>© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
       </footer>
+
+      <style jsx>{`
+        @keyframes pulseLogo {
+          0%, 100% { transform: scale(1); opacity: 0.9; }
+          50% { transform: scale(1.05); opacity: 1; }
+        }
+      `}</style>
     </div>
   )
 }
