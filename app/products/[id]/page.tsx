@@ -100,36 +100,64 @@ export default function ProductPage() {
         <div style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
           
           <div style={{ flex: 1, backgroundColor: '#fafafa', position: 'relative' }}>
-            {images.length > 0 ? (
-              <>
-                <div ref={scrollRef} style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
-                  {images.map((img: string, i: number) => (
-                    <div key={i} style={{ minWidth: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                      onClick={() => { setFullscreenImage(i); setFullscreen(true) }}>
-                      <img src={img} alt={`${product.name} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </div>
-                  ))}
-                </div>
-                {images.length > 1 && (
-                  <>
-                    <div style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
-                      {images.map((_: string, i: number) => (
-                        <button key={i} onClick={() => scrollToImage(i)} style={{
-                          width: currentImage === i ? '18px' : '7px', height: '7px', borderRadius: '10px',
-                          border: 'none', cursor: 'pointer', backgroundColor: currentImage === i ? '#e33124' : '#ccc', transition: 'all 0.3s',
-                        }} />
-                      ))}
-                    </div>
-                    <button onClick={() => scrollToImage(Math.max(0, currentImage - 1))} style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '18px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>‹</button>
-                    <button onClick={() => scrollToImage(Math.min(images.length - 1, currentImage + 1))} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '32px', height: '32px', fontSize: '18px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>›</button>
-                  </>
-                )}
-                <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{currentImage + 1}/{images.length}</div>
-              </>
-            ) : (
-              <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ddd', fontSize: '48px' }}>📷</div>
-            )}
-          </div>
+           {/* AliExpress-style Image Gallery */}
+<div style={{ display: 'flex', gap: '12px', flex: 1, backgroundColor: '#fafafa', padding: '16px' }}>
+  {/* Thumbnails - Vertical */}
+  {images.length > 1 && (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '400px' }}>
+      {images.map((img: string, i: number) => (
+        <div
+          key={i}
+          onClick={() => setCurrentImage(i)}
+          style={{
+            width: '56px', height: '56px', borderRadius: '4px', overflow: 'hidden',
+            cursor: 'pointer', border: currentImage === i ? '2px solid #e33124' : '2px solid transparent',
+            opacity: currentImage === i ? 1 : 0.5, transition: 'all 0.2s',
+          }}
+        >
+          <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      ))}
+    </div>
+  )}
+
+  {/* Main Image */}
+  <div
+    onClick={() => { if (images.length > 0) { setFullscreenImage(currentImage); setFullscreen(true) } }}
+    style={{
+      flex: 1, aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      cursor: images.length > 0 ? 'zoom-in' : 'default', backgroundColor: 'white',
+      borderRadius: '8px', position: 'relative',
+    }}
+  >
+    {images.length > 0 ? (
+      <>
+        <img
+          src={images[currentImage]}
+          alt={product.name}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
+        <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '11px' }}>
+          {currentImage + 1}/{images.length}
+        </div>
+        {images.length > 1 && (
+          <>
+            <button onClick={(e) => { e.stopPropagation(); setCurrentImage(prev => (prev - 1 + images.length) % images.length) }}
+              style={{ position: 'absolute', left: '4px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+              ‹
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); setCurrentImage(prev => (prev + 1) % images.length) }}
+              style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+              ›
+            </button>
+          </>
+        )}
+      </>
+    ) : (
+      <span style={{ color: '#ddd', fontSize: '48px' }}>📷</span>
+    )}
+  </div>
+</div>
 
           <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '12px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>{product.category || 'Fashion'}</p>
