@@ -24,7 +24,6 @@ export default function ProductPage() {
   const [deliveryPhone, setDeliveryPhone] = useState('')
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [deliveryLocation, setDeliveryLocation] = useState('')
-  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
   useEffect(() => {
@@ -65,13 +64,6 @@ export default function ProductPage() {
     setTimeout(() => setDeliveryRequested(false), 3000)
   }
 
-  const scrollToImage = (index: number) => {
-    if (scrollRef.current && scrollRef.current.children[index]) {
-      scrollRef.current.children[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-      setCurrentImage(index)
-    }
-  }
-
   if (!mounted || loading) return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
@@ -99,105 +91,64 @@ export default function ProductPage() {
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
         <div style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
           
-          <div style={{ flex: 1, backgroundColor: '#fafafa', position: 'relative' }}>
-           {/* AliExpress-style Image Gallery */}
-<div style={{ display: 'flex', gap: '12px', flex: 1, backgroundColor: '#fafafa', padding: '16px' }}>
-  {/* Thumbnails - Vertical */}
-  {images.length > 1 && (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '400px' }}>
-      {images.map((img: string, i: number) => (
-        <div
-          key={i}
-          onClick={() => setCurrentImage(i)}
-          style={{
-            width: '56px', height: '56px', borderRadius: '4px', overflow: 'hidden',
-            cursor: 'pointer', border: currentImage === i ? '2px solid #e33124' : '2px solid transparent',
-            opacity: currentImage === i ? 1 : 0.5, transition: 'all 0.2s',
-          }}
-        >
-          <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      ))}
-    </div>
-  )}
-
-  {/* Main Image */}
-  <div
-    onClick={() => { if (images.length > 0) { setFullscreenImage(currentImage); setFullscreen(true) } }}
-    style={{
-      flex: 1, aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      cursor: images.length > 0 ? 'zoom-in' : 'default', backgroundColor: 'white',
-      borderRadius: '8px', position: 'relative',
-    }}
-  >
-    {images.length > 0 ? (
-      <>
-        <img
-          src={images[currentImage]}
-          alt={product.name}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-        />
-        <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '11px' }}>
-          {currentImage + 1}/{images.length}
-        </div>
-        {images.length > 1 && (
-          <>
-            <button onClick={(e) => { e.stopPropagation(); setCurrentImage(prev => (prev - 1 + images.length) % images.length) }}
-              style={{ position: 'absolute', left: '4px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
-              ‹
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); setCurrentImage(prev => (prev + 1) % images.length) }}
-              style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
-              ›
-            </button>
-          </>
-        )}
-      </>
-    ) : (
-      <span style={{ color: '#ddd', fontSize: '48px' }}>📷</span>
-    )}
-  </div>
-</div>
+          {/* AliExpress-style Image Gallery */}
+          <div style={{ display: 'flex', gap: '12px', flex: 1, backgroundColor: '#fafafa', padding: '16px' }}>
+            {images.length > 1 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '400px' }}>
+                {images.map((img: string, i: number) => (
+                  <div key={i} onClick={() => setCurrentImage(i)}
+                    style={{ width: '56px', height: '56px', borderRadius: '4px', overflow: 'hidden', cursor: 'pointer', border: currentImage === i ? '2px solid #e33124' : '2px solid transparent', opacity: currentImage === i ? 1 : 0.5, transition: 'all 0.2s' }}>
+                    <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+            <div onClick={() => { if (images.length > 0) { setFullscreenImage(currentImage); setFullscreen(true) } }}
+              style={{ flex: 1, aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: images.length > 0 ? 'zoom-in' : 'default', backgroundColor: 'white', borderRadius: '8px', position: 'relative' }}>
+              {images.length > 0 ? (
+                <>
+                  <img src={images[currentImage]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <div style={{ position: 'absolute', top: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '11px' }}>{currentImage + 1}/{images.length}</div>
+                  {images.length > 1 && (
+                    <>
+                      <button onClick={(e) => { e.stopPropagation(); setCurrentImage(prev => (prev - 1 + images.length) % images.length) }}
+                        style={{ position: 'absolute', left: '4px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>‹</button>
+                      <button onClick={(e) => { e.stopPropagation(); setCurrentImage(prev => (prev + 1) % images.length) }}
+                        style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', fontSize: '16px', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>›</button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <span style={{ color: '#ddd', fontSize: '48px' }}>📷</span>
+              )}
+            </div>
+          </div>
 
           <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '12px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>{product.category || 'Fashion'}</p>
             <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#333', marginBottom: '12px', lineHeight: 1.3 }}>{product.name}</h1>
-
             {product.status === 'sold' && <p style={{ color: '#e33124', fontWeight: 600, fontSize: '14px', marginBottom: '12px' }}>⚠️ This item has been sold</p>}
-
             {product.showPrice !== false && product.price ? (
-              <div style={{ marginBottom: '16px' }}>
-                <span style={{ fontSize: '28px', fontWeight: 700, color: '#e33124' }}>K{Number(product.price).toLocaleString()}</span>
-              </div>
-            ) : (
-              <p style={{ color: '#999', marginBottom: '16px' }}>Contact seller for price</p>
-            )}
-
+              <div style={{ marginBottom: '16px' }}><span style={{ fontSize: '28px', fontWeight: 700, color: '#e33124' }}>K{Number(product.price).toLocaleString()}</span></div>
+            ) : <p style={{ color: '#999', marginBottom: '16px' }}>Contact seller for price</p>}
             {product.description && <p style={{ color: '#666', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>{product.description}</p>}
-
             <div style={{ backgroundColor: '#fafafa', borderRadius: '10px', padding: '14px', marginBottom: '20px', border: '1px solid #eee' }}>
               <p style={{ fontWeight: 600, color: '#333', fontSize: '14px' }}>{product.sellerName || 'Unknown Seller'}</p>
             </div>
-
             {!isOwner && product.status === 'active' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
-                <button onClick={() => setShowDeliveryForm(true)}
-                  style={{ backgroundColor: deliveryRequested ? '#00c853' : '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}>
+                <button onClick={() => setShowDeliveryForm(true)} style={{ backgroundColor: deliveryRequested ? '#00c853' : '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s' }}>
                   {deliveryRequested ? '✅ Delivery Requested!' : '❤️ Love This? Get It Delivered'}
                 </button>
               </div>
             )}
-
             {isOwner && (
-              <Link href={`/products/edit/${product.id}`} style={{ marginTop: 'auto', textAlign: 'center', backgroundColor: '#fff5f5', border: '1px solid #e33124', color: '#e33124', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 600, textDecoration: 'none' }}>
-                ✏️ Edit Product
-              </Link>
+              <Link href={`/products/edit/${product.id}`} style={{ marginTop: 'auto', textAlign: 'center', backgroundColor: '#fff5f5', border: '1px solid #e33124', color: '#e33124', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 600, textDecoration: 'none' }}>✏️ Edit Product</Link>
             )}
           </div>
         </div>
       </div>
 
-      {/* Delivery Form Modal */}
       {showDeliveryForm && (
         <div onClick={() => setShowDeliveryForm(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
@@ -226,7 +177,6 @@ export default function ProductPage() {
         </div>
       )}
 
-      {/* Fullscreen */}
       {fullscreen && (
         <div onClick={() => { setFullscreen(false); setZoom(false) }} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.96)', zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <button onClick={() => { setFullscreen(false); setZoom(false) }} style={{ position: 'absolute', top: '16px', right: '16px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', fontSize: '20px', cursor: 'pointer', zIndex: 201 }}>✕</button>
