@@ -42,79 +42,90 @@ export default function DashboardPage() {
 
   if (!user) return null
 
-  const isSeller = profile?.role === 'seller'
-
   return (
-    <div className="min-h-screen bg-[#1a1a2e] text-gray-200">
-      <header className="bg-[#16162a] border-b border-gray-800 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-xl font-black">
-            <span className="text-orange-500">●</span> <span className="text-white">ba</span><span className="text-orange-500">Comesa</span>
-          </Link>
-          <div className="flex items-center gap-3 text-sm">
-            <Link href="/" className="text-gray-400 hover:text-white">Browse</Link>
-            <button onClick={() => signOut(auth)} className="text-gray-400 hover:text-red-400">Logout</button>
-          </div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      {/* Top Bar */}
+      <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between' }}>
+        <span>My Account</span>
+        <button onClick={() => signOut(auth)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '12px' }}>Logout</button>
+      </div>
+
+      {/* Header */}
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '12px 20px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link href="/"><img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '28px' }} /></Link>
+          <Link href="/" style={{ color: '#e33124', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>← Browse Marketplace</Link>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-white mb-1">Welcome, {profile?.fullName || 'User'}</h1>
-        <p className="text-gray-500 mb-8">{isSeller ? 'Seller Dashboard' : 'Buyer Dashboard'}</p>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
+        {/* Welcome */}
+        <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#333', marginBottom: '4px' }}>
+          Welcome, {profile?.fullName || 'User'}
+        </h1>
+        <p style={{ color: '#999', fontSize: '13px', marginBottom: '24px' }}>{user.email}</p>
 
-        {isSeller && (
-          <div className="bg-[#16162a] rounded-2xl border border-gray-800 p-6 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-white">My Products ({products.length})</h2>
-              <Link href="/products/new" className="bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-orange-600">+ Add Product</Link>
-            </div>
-            {products.length === 0 ? (
-              <p className="text-gray-500">No products yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {products.map((p: any) => (
-                  <div key={p.id} className="flex items-center gap-4 p-4 bg-[#0f0f1a] rounded-xl border border-gray-800">
-                    <Link href={`/products/${p.id}`} className="w-14 h-14 rounded-lg bg-[#1a1a2e] flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">
-                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : '📷'}
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/products/${p.id}`} className="font-bold text-white hover:text-orange-400">{p.name}</Link>
-                      <p className="text-xs text-gray-500">
-                        {p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'}
-                        <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                          p.status === 'sold' ? 'bg-red-500/20 text-red-400' :
-                          p.status === 'archived' ? 'bg-gray-500/20 text-gray-400' :
-                          'bg-green-500/20 text-green-400'
-                        }`}>{p.status}</span>
-                      </p>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      {p.status === 'active' && (
-                        <button onClick={() => markAsSold(p.id)} className="text-xs bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 px-3 py-1 rounded-full hover:bg-yellow-500/20">
-                          Mark Sold
-                        </button>
-                      )}
-                      <Link href={`/products/edit/${p.id}`} className="text-xs bg-orange-500/10 border border-orange-500/30 text-orange-400 px-3 py-1 rounded-full hover:bg-orange-500/20">
-                        Edit
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* My Products */}
+        <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#333', margin: 0 }}>My Products ({products.length})</h2>
+            <Link href="/products/new" style={{ backgroundColor: '#e33124', color: 'white', padding: '10px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '13px' }}>
+              + Add New Product
+            </Link>
           </div>
-        )}
 
-        <div className="bg-[#16162a] rounded-2xl border border-gray-800 p-6">
-          <h2 className="text-lg font-bold text-white mb-4">Profile</h2>
-          <div className="space-y-2 text-sm">
-            <p><span className="text-gray-500">Name:</span> <span className="text-white font-bold">{profile?.fullName || 'Not set'}</span></p>
-            <p><span className="text-gray-500">Email:</span> <span className="text-white font-bold">{user.email}</span></p>
-            <p><span className="text-gray-500">Role:</span> <span className="text-white font-bold capitalize">{profile?.role}</span></p>
-            {profile?.phoneNumber && <p><span className="text-gray-500">Phone:</span> <span className="text-white font-bold">{profile.phoneNumber}</span></p>}
+          {products.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+              <p style={{ fontSize: '48px', marginBottom: '12px' }}>📦</p>
+              <p>You haven't listed any products yet.</p>
+              <Link href="/products/new" style={{ color: '#e33124', textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>Sell your first item →</Link>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {products.map((p: any) => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #eee' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {p.images?.[0] ? <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: '#ccc', fontSize: '20px' }}>📷</span>}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Link href={`/products/${p.id}`} style={{ fontWeight: 600, color: '#333', textDecoration: 'none', fontSize: '14px' }}>{p.name}</Link>
+                    <p style={{ color: '#999', fontSize: '12px', marginTop: '2px' }}>
+                      {p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'}
+                      <span style={{
+                        marginLeft: '8px', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 600,
+                        backgroundColor: p.status === 'sold' ? '#fff0f0' : p.status === 'archived' ? '#f0f0f0' : '#f0fff0',
+                        color: p.status === 'sold' ? '#e33124' : p.status === 'archived' ? '#999' : '#00c853',
+                      }}>{p.status}</span>
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {p.status === 'active' && (
+                      <button onClick={() => markAsSold(p.id)} style={{ padding: '6px 12px', borderRadius: '16px', border: '1px solid #ff9900', backgroundColor: '#fff8f0', color: '#ff9900', fontSize: '11px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Mark Sold</button>
+                    )}
+                    <Link href={`/products/edit/${p.id}`} style={{ padding: '6px 12px', borderRadius: '16px', border: '1px solid #e33124', backgroundColor: '#fff5f5', color: '#e33124', fontSize: '11px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>Edit</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Profile Card */}
+        <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#333', marginBottom: '16px' }}>Profile</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
+            <div style={{ display: 'flex' }}><span style={{ color: '#999', width: '100px' }}>Name</span><span style={{ color: '#333', fontWeight: 500 }}>{profile?.fullName || 'Not set'}</span></div>
+            <div style={{ display: 'flex' }}><span style={{ color: '#999', width: '100px' }}>Email</span><span style={{ color: '#333', fontWeight: 500 }}>{user.email}</span></div>
+            <div style={{ display: 'flex' }}><span style={{ color: '#999', width: '100px' }}>Phone</span><span style={{ color: '#333', fontWeight: 500 }}>{profile?.phoneNumber || 'Not set'}</span></div>
+            <div style={{ display: 'flex' }}><span style={{ color: '#999', width: '100px' }}>WhatsApp</span><span style={{ color: profile?.hasWhatsapp ? '#00c853' : '#999', fontWeight: 500 }}>{profile?.hasWhatsapp ? 'Available' : 'Not set'}</span></div>
           </div>
         </div>
-      </main>
+      </div>
+
+      <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '16px', fontSize: '12px', marginTop: '40px' }}>
+        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
+        <p>© {new Date().getFullYear()} ba Comesa Marketplace</p>
+      </footer>
     </div>
   )
 }

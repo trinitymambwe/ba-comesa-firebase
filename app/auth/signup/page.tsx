@@ -11,7 +11,6 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<'buyer' | 'seller'>('buyer')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [hasWhatsapp, setHasWhatsapp] = useState(false)
   const [whatsappNumber, setWhatsappNumber] = useState('')
@@ -21,10 +20,12 @@ export default function SignupPage() {
 
   const saveProfile = async (userId: string) => {
     await setDoc(doc(db, 'profiles', userId), {
-      fullName, phoneNumber: phoneNumber || null,
-      hasWhatsapp: role === 'seller' ? hasWhatsapp : false,
-      whatsappNumber: role === 'seller' && hasWhatsapp ? (whatsappNumber || phoneNumber) : null,
-      role, createdAt: new Date().toISOString(),
+      fullName,
+      phoneNumber: phoneNumber || null,
+      hasWhatsapp: hasWhatsapp,
+      whatsappNumber: hasWhatsapp ? (whatsappNumber || phoneNumber) : null,
+      role: 'user',
+      createdAt: new Date().toISOString(),
     })
   }
 
@@ -45,7 +46,7 @@ export default function SignupPage() {
     try {
       const result = await signInWithPopup(auth, provider)
       await saveProfile(result.user.uid)
-      router.push('/auth/setup-profile')
+      router.push('/')
     } catch (err: any) { setError(err.message) }
   }
 
@@ -59,9 +60,9 @@ export default function SignupPage() {
       </header>
 
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div style={{ width: '100%', maxWidth: '420px', backgroundColor: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 16px rgba(0,0,0,0.08)' }}>
+        <div style={{ width: '100%', maxWidth: '400px', backgroundColor: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 16px rgba(0,0,0,0.08)' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#333', marginBottom: '4px', textAlign: 'center' }}>Create Account</h2>
-          <p style={{ color: '#999', fontSize: '13px', textAlign: 'center', marginBottom: '24px' }}>Start buying and selling fashion</p>
+          <p style={{ color: '#999', fontSize: '13px', textAlign: 'center', marginBottom: '24px' }}>Buy and sell fashion on ba Comesa</p>
 
           {error && <div style={{ backgroundColor: '#fff0f0', border: '1px solid #ffcccc', color: '#e33124', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px' }}>{error}</div>}
 
@@ -85,34 +86,20 @@ export default function SignupPage() {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email address" style={{ padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Password (min 6 characters)" style={{ padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
 
-            {/* Role Selection */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <button type="button" onClick={() => setRole('buyer')}
-                style={{ padding: '12px', borderRadius: '8px', border: role === 'buyer' ? '2px solid #e33124' : '1px solid #ddd', backgroundColor: role === 'buyer' ? '#fff5f5' : 'white', color: role === 'buyer' ? '#e33124' : '#666', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
-                🛍️ I'm a Buyer
-              </button>
-              <button type="button" onClick={() => setRole('seller')}
-                style={{ padding: '12px', borderRadius: '8px', border: role === 'seller' ? '2px solid #e33124' : '1px solid #ddd', backgroundColor: role === 'seller' ? '#fff5f5' : 'white', color: role === 'seller' ? '#e33124' : '#666', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
-                🏪 I'm a Seller
-              </button>
+            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone Number (optional)" style={{ padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
+
+            <div style={{ backgroundColor: '#fafafa', padding: '12px', borderRadius: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#333', cursor: 'pointer' }}>
+                <input type="checkbox" checked={hasWhatsapp} onChange={(e) => setHasWhatsapp(e.target.checked)} style={{ accentColor: '#e33124' }} />
+                I have WhatsApp
+              </label>
+              {hasWhatsapp && (
+                <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="WhatsApp number (if different from phone)" style={{ marginTop: '8px', width: '100%', padding: '10px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
+              )}
             </div>
 
-            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required={role === 'seller'} placeholder={`Phone Number ${role === 'seller' ? '(required)' : '(optional)'}`} style={{ padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
-
-            {role === 'seller' && (
-              <div style={{ backgroundColor: '#fafafa', padding: '12px', borderRadius: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#333', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={hasWhatsapp} onChange={(e) => setHasWhatsapp(e.target.checked)} style={{ accentColor: '#e33124' }} />
-                  I have WhatsApp
-                </label>
-                {hasWhatsapp && (
-                  <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} placeholder="WhatsApp number (if different)" style={{ marginTop: '8px', width: '100%', padding: '10px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
-                )}
-              </div>
-            )}
-
             <button type="submit" disabled={loading}
-              style={{ backgroundColor: '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1, marginTop: '4px' }}>
+              style={{ backgroundColor: '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
