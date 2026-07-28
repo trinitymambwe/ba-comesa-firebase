@@ -18,6 +18,13 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
 
+  const bgColor = '#0d1b2a'
+  const cardBg = '#0a1628'
+  const accent = '#e85d04'
+  const textColor = '#e0e0e0'
+  const mutedText = '#9ca3af'
+  const borderColor = '#1e3a5f'
+
   useEffect(() => {
     setMounted(true)
     setWindowWidth(window.innerWidth)
@@ -77,9 +84,9 @@ export default function HomePage() {
 
   if (!logoDone) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: bgColor, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ width: isMobile ? '140px' : '180px', marginBottom: '20px', animation: 'pulseLogo 1.5s ease-in-out infinite' }} />
-        <p style={{ color: '#e33124', fontWeight: 700, fontSize: isMobile ? '14px' : '16px', letterSpacing: '2px' }}>Style Meets Community</p>
+        <p style={{ color: accent, fontWeight: 700, fontSize: isMobile ? '14px' : '16px', letterSpacing: '2px' }}>Style Meets Community</p>
         <style jsx>{`@keyframes pulseLogo{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:1}}`}</style>
       </div>
     )
@@ -88,23 +95,21 @@ export default function HomePage() {
   const flashDeals = products.slice(0, 6)
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: bgColor, color: textColor }}>
       {/* TOP BAR */}
       {!isMobile && (
-        <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ backgroundColor: '#060f1a', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${borderColor}` }}>
           <div style={{ display: 'flex', gap: '20px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={12} /> Zambia</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingBag size={12} /> Download App</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MessageCircle size={12} /> Live Chat</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: mutedText }}><MapPin size={12} color={accent} /> Zambia</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: mutedText }}><ShoppingBag size={12} color={accent} /> Marketplace</span>
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
+          <div style={{ display: 'flex', gap: '16px', color: mutedText }}>
             {user ? (
               <span>Welcome, {user.email?.split('@')[0]}</span>
             ) : (
               <>
-                <Link href="/auth/login" style={{ color: 'white', textDecoration: 'none' }}>Sign In</Link>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>|</span>
-                <Link href="/auth/signup" style={{ color: 'white', textDecoration: 'none' }}>Sign Up</Link>
+                <Link href="/auth/login" style={{ color: mutedText, textDecoration: 'none' }}>Sign In</Link>
+                <Link href="/auth/signup" style={{ color: mutedText, textDecoration: 'none' }}>Sign Up</Link>
               </>
             )}
           </div>
@@ -112,7 +117,7 @@ export default function HomePage() {
       )}
 
       {/* HEADER */}
-      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', position: 'sticky', top: 0, zIndex: 50, padding: isMobile ? '8px 12px' : '12px 20px' }}>
+      <header style={{ backgroundColor: cardBg, borderBottom: `1px solid ${borderColor}`, position: 'sticky', top: 0, zIndex: 50, padding: isMobile ? '8px 12px' : '12px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '20px' }}>
           <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
             <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: isMobile ? '24px' : '32px' }} />
@@ -120,11 +125,9 @@ export default function HomePage() {
           {!isMobile && (
             <div style={{ flex: 1, maxWidth: '600px', position: 'relative' }}>
               <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="I'm shopping for..." style={{
-                  width: '100%', padding: '10px 45px 10px 16px', borderRadius: '20px', border: '2px solid #e33124',
-                  outline: 'none', fontSize: '14px', boxSizing: 'border-box', backgroundColor: '#fafafa',
-                }} />
-              <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#e33124', color: 'white', padding: '6px 14px', borderRadius: '16px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                placeholder="Search products..."
+                style={{ width: '100%', padding: '10px 45px 10px 16px', borderRadius: '20px', border: `2px solid ${accent}`, outline: 'none', fontSize: '14px', boxSizing: 'border-box', backgroundColor: bgColor, color: textColor }} />
+              <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: accent, color: 'white', padding: '6px 14px', borderRadius: '16px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Search size={14} /> Search
               </span>
             </div>
@@ -133,13 +136,13 @@ export default function HomePage() {
             <nav style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px', whiteSpace: 'nowrap' }}>
               {user ? (
                 <>
-                  <Link href="/wishlist" style={{ color: '#333', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Heart size={16} /> <span>Wishlist</span>
+                  <Link href="/wishlist" style={{ color: mutedText, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Heart size={16} color={accent} /> Wishlist
                   </Link>
-                  <Link href="/dashboard" style={{ backgroundColor: '#e33124', color: 'white', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>My Account</Link>
+                  <Link href="/dashboard" style={{ backgroundColor: accent, color: 'white', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Dashboard</Link>
                 </>
               ) : (
-                <Link href="/auth/signup" style={{ backgroundColor: '#e33124', color: 'white', padding: '8px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Join Free</Link>
+                <Link href="/auth/signup" style={{ backgroundColor: accent, color: 'white', padding: '8px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Join Free</Link>
               )}
             </nav>
           )}
@@ -147,10 +150,10 @@ export default function HomePage() {
       </header>
 
       {/* CATEGORY BAR */}
-      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '8px 20px' }}>
+      <div style={{ backgroundColor: cardBg, borderBottom: `1px solid ${borderColor}`, padding: '8px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '24px', fontSize: '13px', overflowX: 'auto' }}>
           {[{ name: 'Dresses', slug: 'dresses' }, { name: 'Shoes', slug: 'shoes' }, { name: 'Bags', slug: 'bags' }, { name: 'Accessories', slug: 'accessories' }, { name: 'Trending', slug: 'trending' }].map(cat => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`} style={{ color: '#666', textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500, fontSize: '13px' }}>
+            <Link key={cat.slug} href={`/category/${cat.slug}`} style={{ color: mutedText, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}>
               {cat.name}
             </Link>
           ))}
@@ -159,58 +162,37 @@ export default function HomePage() {
 
       {/* Mobile Search */}
       {isMobile && (
-        <div style={{ padding: '8px 12px', backgroundColor: 'white' }}>
+        <div style={{ padding: '8px 12px', backgroundColor: cardBg }}>
           <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="I'm shopping for..." style={{
-              width: '100%', padding: '10px 14px', borderRadius: '20px', border: '2px solid #e33124',
-              outline: 'none', fontSize: '14px', boxSizing: 'border-box', backgroundColor: '#fafafa',
-            }} />
-        </div>
-      )}
-
-      {/* Mobile Menu */}
-      {isMobile && mobileMenuOpen && (
-        <div style={{ backgroundColor: 'white', padding: '12px', borderBottom: '1px solid #e8e8e8', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {user ? (
-            <>
-              <Link href="/wishlist" style={{ color: '#333', textDecoration: 'none', padding: '8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}><Heart size={16} /> Wishlist</Link>
-              <Link href="/dashboard" style={{ color: '#e33124', textDecoration: 'none', fontWeight: 600, padding: '8px 0' }}>Dashboard</Link>
-              <button onClick={() => signOut(auth)} style={{ color: '#999', background: 'none', border: 'none', textAlign: 'left', padding: '8px 0', cursor: 'pointer' }}>Logout</button>
-            </>
-          ) : (
-            <>
-              <Link href="/auth/login" style={{ color: '#333', textDecoration: 'none', padding: '8px 0' }}>Sign In</Link>
-              <Link href="/auth/signup" style={{ backgroundColor: '#e33124', color: 'white', padding: '10px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, textAlign: 'center' }}>Join Free</Link>
-            </>
-          )}
+            placeholder="Search products..." style={{ width: '100%', padding: '10px 14px', borderRadius: '20px', border: `2px solid ${accent}`, outline: 'none', fontSize: '14px', boxSizing: 'border-box', backgroundColor: bgColor, color: textColor }} />
         </div>
       )}
 
       {/* FLASH DEALS */}
       {!loading && flashDeals.length > 0 && !isMobile && (
-        <div style={{ backgroundColor: 'white', margin: '12px 20px', borderRadius: '12px', padding: '16px 20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ backgroundColor: cardBg, margin: '12px 20px', borderRadius: '12px', padding: '16px 20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto', border: `1px solid ${borderColor}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <Zap size={20} color="#e33124" />
-            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#333', margin: 0 }}>Flash Deals</h3>
-            <span style={{ backgroundColor: '#e33124', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, animation: 'pulse 1s infinite' }}>ENDING SOON</span>
+            <Zap size={20} color={accent} />
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: textColor, margin: 0 }}>Flash Deals</h3>
+            <span style={{ backgroundColor: accent, color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, animation: 'pulse 1s infinite' }}>ENDING SOON</span>
           </div>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
             {flashDeals.map((p: any) => (
               <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: 'none', minWidth: '160px', flex: '0 0 auto' }}>
-                <div style={{ backgroundColor: '#fafafa', borderRadius: '8px', overflow: 'hidden', border: '1px solid #eee' }}>
+                <div style={{ backgroundColor: bgColor, borderRadius: '8px', overflow: 'hidden', border: `1px solid ${borderColor}` }}>
                   <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {p.images?.[0] ? (
                       <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <ShoppingBag size={40} style={{ color: '#ddd' }} />
+                      <ShoppingBag size={40} style={{ color: '#4b5563' }} />
                     )}
                   </div>
                   <div style={{ padding: '8px' }}>
-                    <p style={{ fontSize: '16px', fontWeight: 700, color: '#e33124', margin: '0 0 2px' }}>
+                    <p style={{ fontSize: '16px', fontWeight: 700, color: accent, margin: '0 0 2px' }}>
                       K{Number((p.price || 100) * 0.7).toLocaleString()}
                     </p>
                     {p.price && (
-                      <p style={{ fontSize: '11px', color: '#999', textDecoration: 'line-through', margin: '0' }}>
+                      <p style={{ fontSize: '11px', color: mutedText, textDecoration: 'line-through', margin: '0' }}>
                         K{Number(p.price).toLocaleString()}
                       </p>
                     )}
@@ -225,28 +207,24 @@ export default function HomePage() {
       {/* MAIN PRODUCT GRID */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '12px' : '12px 20px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '16px' }}>
-          <h2 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: 700, color: '#333', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <TrendingUp size={20} color="#e33124" /> Trending Now
+          <h2 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: 700, color: textColor, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <TrendingUp size={20} color={accent} /> Trending Now
           </h2>
-          {user && <Link href="/products/new" style={{ color: '#e33124', textDecoration: 'none', fontSize: isMobile ? '12px' : '13px', fontWeight: 600 }}>+ Sell</Link>}
+          {user && <Link href="/products/new" style={{ color: accent, textDecoration: 'none', fontSize: isMobile ? '12px' : '13px', fontWeight: 600 }}>+ Sell</Link>}
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: isMobile ? '40px 20px' : '60px' }}>
-            <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: isMobile ? '60px' : '80px', opacity: 0.5, animation: 'pulseLogo 1.5s ease-in-out infinite' }} />
-            <p style={{ color: '#999', marginTop: '12px', fontSize: isMobile ? '12px' : '14px' }}>Discovering amazing deals...</p>
+          <div style={{ textAlign: 'center', padding: '60px' }}>
+            <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', opacity: 0.5, animation: 'pulseLogo 1.5s infinite' }} />
+            <p style={{ color: mutedText, marginTop: '12px', fontSize: '13px' }}>Loading products...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: isMobile ? '40px 20px' : '60px', backgroundColor: 'white', borderRadius: '12px' }}>
-            <ShoppingBag size={48} style={{ color: '#ddd', marginBottom: '12px' }} />
-            <p style={{ color: '#999', fontSize: isMobile ? '14px' : '16px' }}>No products found</p>
+          <div style={{ textAlign: 'center', padding: '60px', backgroundColor: cardBg, borderRadius: '12px', border: `1px solid ${borderColor}` }}>
+            <ShoppingBag size={48} style={{ color: '#4b5563', marginBottom: '12px' }} />
+            <p style={{ color: mutedText, fontSize: '15px' }}>No products found</p>
           </div>
         ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
-            gap: isMobile ? '8px' : '12px',
-          }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${gridColumns}, 1fr)`, gap: isMobile ? '8px' : '12px' }}>
             {filtered.map((p: any, i: number) => {
               const badge = getBadge(i)
               const stars = getStars(i)
@@ -255,40 +233,37 @@ export default function HomePage() {
               return (
                 <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: 'none' }}
                   onMouseEnter={() => setHoveredProduct(p.id)}
-                  onMouseLeave={() => setHoveredProduct(null)}
-                >
+                  onMouseLeave={() => setHoveredProduct(null)}>
                   <div style={{
-                    backgroundColor: 'white', borderRadius: isMobile ? '6px' : '8px', overflow: 'hidden',
-                    border: isHovered ? '1px solid #e33124' : '1px solid #eee',
-                    boxShadow: isHovered ? '0 8px 30px rgba(227,49,36,0.15)' : 'none',
-                    transition: 'all 0.3s ease',
-                    transform: isHovered ? 'translateY(-4px)' : 'none',
-                    position: 'relative',
+                    backgroundColor: cardBg, borderRadius: '8px', overflow: 'hidden',
+                    border: isHovered ? `1px solid ${accent}` : `1px solid ${borderColor}`,
+                    boxShadow: isHovered ? `0 8px 30px rgba(232,93,4,0.15)` : 'none',
+                    transition: 'all 0.3s ease', transform: isHovered ? 'translateY(-4px)' : 'none', position: 'relative',
                   }}>
-                    <div style={{ aspectRatio: '1', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ aspectRatio: '1', backgroundColor: bgColor, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
                       {p.images?.[0] ? (
                         <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s', transform: isHovered ? 'scale(1.05)' : 'scale(1)' }} />
                       ) : (
-                        <ShoppingBag size={40} style={{ color: '#ddd' }} />
+                        <ShoppingBag size={40} style={{ color: '#4b5563' }} />
                       )}
                       <span style={{ position: 'absolute', top: '6px', left: '6px', backgroundColor: badge.color, color: 'white', padding: '2px 8px', borderRadius: '3px', fontSize: isMobile ? '9px' : '10px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
                         <badge.icon size={10} /> {badge.text}
                       </span>
                       {p.showPrice !== false && p.price && (
-                        <span style={{ position: 'absolute', bottom: '6px', right: '6px', backgroundColor: 'rgba(0,0,0,0.75)', color: '#ff6600', padding: '2px 8px', borderRadius: '4px', fontSize: isMobile ? '10px' : '12px', fontWeight: 700 }}>
+                        <span style={{ position: 'absolute', bottom: '6px', right: '6px', backgroundColor: 'rgba(0,0,0,0.8)', color: accent, padding: '2px 8px', borderRadius: '4px', fontSize: isMobile ? '10px' : '12px', fontWeight: 700 }}>
                           K{Number(p.price).toLocaleString()}
                         </span>
                       )}
                     </div>
                     <div style={{ padding: isMobile ? '6px 8px' : '10px 12px' }}>
-                      <p style={{ fontSize: isMobile ? '9px' : '11px', color: '#e33124', fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>{p.category || 'Fashion'}</p>
-                      <p style={{ fontSize: isMobile ? '10px' : '12px', color: '#333', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '4px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', whiteSpace: isMobile ? 'normal' : 'nowrap' }}>{p.name}</p>
+                      <p style={{ fontSize: isMobile ? '9px' : '11px', color: accent, fontWeight: 600, textTransform: 'uppercase', marginBottom: '2px' }}>{p.category || 'Fashion'}</p>
+                      <p style={{ fontSize: isMobile ? '10px' : '12px', color: textColor, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '4px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', whiteSpace: isMobile ? 'normal' : 'nowrap' }}>{p.name}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
                         <Star size={isMobile ? 10 : 12} color="#ff9900" fill="#ff9900" />
                         <span style={{ color: '#ff9900', fontSize: isMobile ? '9px' : '10px', fontWeight: 600 }}>{stars}</span>
-                        <span style={{ color: '#999', fontSize: isMobile ? '8px' : '10px' }}>({Math.floor(Math.random() * 500 + 50)})</span>
+                        <span style={{ color: mutedText, fontSize: isMobile ? '8px' : '10px' }}>({Math.floor(Math.random() * 500 + 50)})</span>
                       </div>
-                      <p style={{ fontSize: isMobile ? '9px' : '11px', color: '#999' }}>{p.sellerName || 'Unknown Seller'}</p>
+                      <p style={{ fontSize: isMobile ? '9px' : '11px', color: mutedText }}>{p.sellerName || 'Unknown Seller'}</p>
                     </div>
                   </div>
                 </Link>
@@ -300,23 +275,23 @@ export default function HomePage() {
 
       {/* MOBILE BOTTOM NAV */}
       {isMobile && user && (
-        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: 'white', borderTop: '1px solid #e8e8e8', display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
-          <Link href="/" style={{ color: '#e33124', textDecoration: 'none', textAlign: 'center', fontSize: '10px', fontWeight: 600 }}>
-            <Home size={20} color="#e33124" /> <div>Home</div>
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: cardBg, borderTop: `1px solid ${borderColor}`, display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
+          <Link href="/" style={{ color: accent, textDecoration: 'none', textAlign: 'center', fontSize: '10px', fontWeight: 600 }}>
+            <Home size={20} color={accent} /> <div>Home</div>
           </Link>
-          <Link href="/wishlist" style={{ color: '#666', textDecoration: 'none', textAlign: 'center', fontSize: '10px' }}>
+          <Link href="/wishlist" style={{ color: mutedText, textDecoration: 'none', textAlign: 'center', fontSize: '10px' }}>
             <Heart size={20} /> <div>Wishlist</div>
           </Link>
-          <Link href="/dashboard" style={{ color: '#666', textDecoration: 'none', textAlign: 'center', fontSize: '10px' }}>
+          <Link href="/dashboard" style={{ color: mutedText, textDecoration: 'none', textAlign: 'center', fontSize: '10px' }}>
             <User size={20} /> <div>Account</div>
           </Link>
         </div>
       )}
 
       {!isMobile && (
-        <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '24px', fontSize: '13px', marginTop: '40px' }}>
+        <footer style={{ backgroundColor: '#060f1a', borderTop: `1px solid ${borderColor}`, textAlign: 'center', padding: '24px', fontSize: '13px', marginTop: '40px' }}>
           <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px', marginBottom: '8px' }} />
-          <p>© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
+          <p style={{ color: mutedText }}>© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
         </footer>
       )}
 
