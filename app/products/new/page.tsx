@@ -32,16 +32,10 @@ export default function NewProductPage() {
         getDoc(doc(db, 'profiles', u.uid)).then((snap: any) => {
           if (snap.exists()) {
             const p = snap.data()
-            if (p.role !== 'seller') {
-              router.push('/dashboard')
-              return
-            }
             setSellerName(p.fullName || '')
             setSellerPhone(p.phoneNumber || '')
             setHasWhatsapp(p.hasWhatsapp || false)
             setWhatsappNumber(p.whatsappNumber || '')
-          } else {
-            router.push('/dashboard')
           }
         })
       } else {
@@ -54,56 +48,35 @@ export default function NewProductPage() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
-
     setImages(prev => [...prev, ...files])
-
-    const newPreviews = files.map(file => URL.createObjectURL(file))
-    setImagePreviews(prev => [...prev, ...newPreviews])
+    setImagePreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))])
   }
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index))
-    setImagePreviews(prev => {
-      URL.revokeObjectURL(prev[index])
-      return prev.filter((_, i) => i !== index)
-    })
+    setImagePreviews(prev => { URL.revokeObjectURL(prev[index]); return prev.filter((_, i) => i !== index) })
   }
 
   const imagesToBase64 = async (files: File[]): Promise<string[]> => {
-    const promises = files.map(file => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          const img = new Image()
-          img.onload = () => {
-            const canvas = document.createElement('canvas')
-            const maxWidth = 800
-            const maxHeight = 800
-            let width = img.width
-            let height = img.height
-
-            if (width > maxWidth) {
-              height = (maxWidth / width) * height
-              width = maxWidth
-            }
-            if (height > maxHeight) {
-              width = (maxHeight / height) * width
-              height = maxHeight
-            }
-
-            canvas.width = width
-            canvas.height = height
-            const ctx = canvas.getContext('2d')
-            ctx?.drawImage(img, 0, 0, width, height)
-            resolve(canvas.toDataURL('image/jpeg', 0.6))
-          }
-          img.src = e.target?.result as string
+    return Promise.all(files.map(file => new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const max = 800
+          let w = img.width, h = img.height
+          if (w > max) { h = (max / w) * h; w = max }
+          if (h > max) { w = (max / h) * w; h = max }
+          canvas.width = w; canvas.height = h
+          canvas.getContext('2d')?.drawImage(img, 0, 0, w, h)
+          resolve(canvas.toDataURL('image/jpeg', 0.6))
         }
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-    })
-    return Promise.all(promises)
+        img.src = e.target?.result as string
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,145 +85,106 @@ export default function NewProductPage() {
     setError('')
     try {
       let base64Images: string[] = []
-
-      if (images.length > 0) {
-        base64Images = await imagesToBase64(images)
-      }
+      if (images.length > 0) base64Images = await imagesToBase64(images)
 
       await addDoc(collection(db, 'products'), {
-        name,
-        description,
-        price: price ? parseFloat(price) : null,
-        showPrice,
-        category,
+        name, description,
+        price: price ? parseFloat(price) : null, showPrice, category,
         images: base64Images,
-        sellerId: user.uid,
-        sellerName,
-        sellerPhone,
-        hasWhatsapp,
-        whatsappNumber: hasWhatsapp ? (whatsappNumber || sellerPhone) : null,
-        status: 'active',
-        createdAt: new Date().toISOString(),
+        sellerId: user.uid, sellerName, sellerPhone,
+        hasWhatsapp, whatsappNumber: hasWhatsapp ? (whatsappNumber || sellerPhone) : null,
+        status: 'active', createdAt: new Date().toISOString(),
       })
       router.push('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong. Try smaller images.')
-    }
+    } catch (err: any) { setError(err.message || 'Something went wrong.') }
     setLoading(false)
   }
 
   if (!user) return null
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0d1b2a', color: '#e0e0e0' }}>
-      <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black">
-            <span className="text-orange-500">●</span> <span style={{ color: '#e0e0e0' }}>ba</span><span className="text-orange-500">Comesa</span>
-          </Link>
-          <Link href="/dashboard" style={{ color: '#9ca3af' }} className="hover:text-white text-sm">← Dashboard</Link>
-        </div>
-      </nav>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      {/* Top Bar */}
+      <div style={{ backgroundColor: '#e33124', color: 'white', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between' }}>
+        <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none' }}>← Dashboard</Link>
+        <span>Sell an Item</span>
+      </div>
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-black mb-8" style={{ color: '#e0e0e0' }}>Add New Product</h1>
+      {/* Header */}
+      <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '10px 20px', textAlign: 'center' }}>
+        <Link href="/"><img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px' }} /></Link>
+      </header>
 
-        {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm">{error}</div>}
+      {/* Form */}
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+        <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#333', marginBottom: '20px' }}>List a Product</h1>
 
-        <form onSubmit={handleSubmit} className="rounded-3xl shadow-sm p-6 md:p-8 space-y-5 border" style={{ backgroundColor: '#0a1628', borderColor: '#1e3a5f' }}>
+        {error && <div style={{ backgroundColor: '#fff0f0', border: '1px solid #ffcccc', color: '#e33124', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px' }}>{error}</div>}
 
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Product Name *</label>
-            <input type="text" value={name} onChange={(e: any) => setName(e.target.value)} required className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="e.g., Vintage Denim Jacket" />
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '4px' }}>Product Name *</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required
+              placeholder="e.g., Vintage Denim Jacket" style={{ width: '100%', padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Category</label>
-            <input type="text" value={category} onChange={(e: any) => setCategory(e.target.value)} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="e.g., Dresses, Shoes, Accessories" />
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '4px' }}>Category</label>
+            <input type="text" value={category} onChange={(e) => setCategory(e.target.value)}
+              placeholder="e.g., Dresses, Shoes, Accessories" style={{ width: '100%', padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Description</label>
-            <textarea value={description} onChange={(e: any) => setDescription(e.target.value)} rows={4} className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 resize-none" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="Describe your product..." />
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '4px' }}>Description</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4}
+              placeholder="Describe your product..." style={{ width: '100%', padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1" style={{ color: '#9ca3af' }}>Price (K)</label>
-            <input type="number" value={price} onChange={(e: any) => setPrice(e.target.value)} min="0" step="0.01" className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2" style={{ backgroundColor: '#0d1b2a', borderColor: '#1e3a5f', color: '#e0e0e0' }} placeholder="0.00" />
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '4px' }}>Price (K)</label>
+            <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} min="0" step="0.01"
+              placeholder="0.00" style={{ width: '100%', padding: '12px 14px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={showPrice} onChange={(e: any) => setShowPrice(e.target.checked)} className="accent-orange-500" />
-            <span className="text-sm font-bold" style={{ color: '#9ca3af' }}>Show price on product page</span>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#333', cursor: 'pointer' }}>
+            <input type="checkbox" checked={showPrice} onChange={(e) => setShowPrice(e.target.checked)} style={{ accentColor: '#e33124' }} />
+            Show price on product page
           </label>
 
+          {/* Images */}
           <div>
-            <label className="block text-sm font-bold mb-2" style={{ color: '#9ca3af' }}>Product Images</label>
-
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              ref={fileInputRef}
-              onChange={handleImageSelect}
-              className="hidden"
-              id="image-upload"
-            />
-
-            <div className="flex gap-3 mb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  if (fileInputRef.current) {
-                    fileInputRef.current.setAttribute('capture', 'environment')
-                    fileInputRef.current.click()
-                  }
-                }}
-                className="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition"
-                style={{ borderColor: '#f97316', color: '#f97316' }}
-              >
-                📸 Take Photo
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (fileInputRef.current) {
-                    fileInputRef.current.removeAttribute('capture')
-                    fileInputRef.current.click()
-                  }
-                }}
-                className="flex-1 py-3 px-4 rounded-xl border-2 font-bold text-sm transition"
-                style={{ borderColor: '#9ca3af', color: '#9ca3af' }}
-              >
-                🖼️ Choose from Device
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '8px' }}>Product Images</label>
+            <input type="file" accept="image/*" multiple ref={fileInputRef} onChange={handleImageSelect} style={{ display: 'none' }} id="img-upload" />
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+              <button type="button" onClick={() => fileInputRef.current?.click()}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '2px dashed #ddd', backgroundColor: '#fafafa', color: '#666', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+                📸 Choose Photos
               </button>
             </div>
-
             {imagePreviews.length > 0 && (
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                {imagePreviews.map((preview, index) => (
-                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden" style={{ backgroundColor: '#0d1b2a' }}>
-                    <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
-                    >
-                      ✕
-                    </button>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                {imagePreviews.map((preview, i) => (
+                  <div key={i} style={{ aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+                    <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button type="button" onClick={() => removeImage(i)}
+                      style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: '22px', height: '22px', fontSize: '12px', cursor: 'pointer' }}>✕</button>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          <button type="submit" disabled={loading} className="w-full text-white font-bold py-4 rounded-2xl transition" style={{ backgroundColor: '#f97316' }}>
+          <button type="submit" disabled={loading}
+            style={{ backgroundColor: '#e33124', color: 'white', border: 'none', borderRadius: '8px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', opacity: loading ? 0.6 : 1, marginTop: '8px' }}>
             {loading ? 'Listing Product...' : 'List Product'}
           </button>
         </form>
-      </main>
+      </div>
+
+      <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '16px', fontSize: '12px', marginTop: '40px' }}>
+        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
+        <p>© {new Date().getFullYear()} ba Comesa Marketplace</p>
+      </footer>
     </div>
   )
 }
