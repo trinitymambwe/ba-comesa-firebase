@@ -6,8 +6,8 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles, Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp } from 'lucide-react'
-import { useTheme } from '@/components/ThemeSwitcher'
-
+import { useTheme } from './components/ThemeSwitcher'
+import ThemeSwitcher from './components/ThemeSwitcher'
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [products, setProducts] = useState<any[]>([])
