@@ -325,13 +325,13 @@ export default function HomePage() {
                         fontSize: isMobile ? '9px' : '11px', color: '#e33124', fontWeight: 600,
                         textTransform: 'uppercase', marginBottom: '2px',
                       }}>{p.category || 'Fashion'}</p>
-                      <p style={{
-                        fontSize: isMobile ? '10px' : '12px', color: '#333', fontWeight: 500,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        marginBottom: '4px', lineHeight: '1.3',
-                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                        whiteSpace: isMobile ? 'normal' : 'nowrap',
-                      }}>{p.name}</p>
+                     <p style={{
+  fontSize: isMobile ? '10px' : '12px', color: '#333', fontWeight: 500,
+  overflow: 'hidden', textOverflow: 'ellipsis',
+  marginBottom: '4px', lineHeight: '1.3',
+  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+  whiteSpace: isMobile ? 'normal' : 'nowrap',
+}}>{p.name}</p>
 
                       {/* Stars */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
