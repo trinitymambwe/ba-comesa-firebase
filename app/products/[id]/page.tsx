@@ -10,7 +10,7 @@ import {
   MapPin, Pencil, Heart, ShoppingBag, ChevronLeft, ChevronRight,
   X, ZoomIn, ZoomOut, Truck, Camera, CheckCircle, AlertTriangle, User
 } from 'lucide-react'
-import LocationPicker from '@/components/LocationPicker'
+import LocationPicker from '../../components/LocationPicker'
 
 export default function ProductPage() {
   const { id } = useParams()
