@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/AuthContext'
+import { ThemeProvider } from '@/context/ThemeContext'
+import FeedbackButton from '@/components/FeedbackButton'
+import TrackVisit from '@/lib/trackVisit'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,7 +23,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="google-site-verification" content="iVyrYBU9sQXO3rCvd5GvWIJ8zah3W6ksvr6OqEL2kdM" />
       </head>
       <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <FeedbackButton />
+            <TrackVisit />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -18,8 +18,10 @@ export default function HomePage() {
   const [windowWidth, setWindowWidth] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
-
-  const { theme } = useTheme()
+import { useGlobalTheme } from '@/context/ThemeContext'
+// inside component:
+const { theme } = useGlobalTheme()
+  
 
   const bgColor = theme.bg
   const cardBg = theme.card

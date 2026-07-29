@@ -6,7 +6,8 @@ import { collection, getDocs, query, where, orderBy, doc, getDoc, updateDoc } fr
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Settings } from 'lucide-react'
+import { Settings, Package, ShoppingBag, Clock, CheckCircle, User, Bike, ChevronRight, MessageCircle } from 'lucide-react'
+import { useGlobalTheme } from '@/context/ThemeContext'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
@@ -14,6 +15,7 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<any[]>([])
   const [orders, setOrders] = useState<any[]>([])
   const router = useRouter()
+  const { theme } = useGlobalTheme()
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u: any) => {
@@ -53,50 +55,54 @@ export default function DashboardPage() {
   const isSeller = profile?.role === 'seller'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-        <Link href="/" className="text-xl font-black text-red-600">baComesa</Link>
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/" className="text-gray-500 hover:text-red-600">Browse</Link>
-<Link href="/settings" className="flex items-center gap-1 text-gray-500 hover:text-red-600">
-  <Settings size={16} /> Settings
-</Link>
-<button onClick={() => signOut(auth)} className="text-gray-500 hover:text-red-600">Logout</button>
+    <div style={{ minHeight: '100vh', backgroundColor: theme.bg, color: theme.text }}>
+      {/* Header */}
+      <header style={{ backgroundColor: theme.card, borderBottom: `1px solid ${theme.border}`, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 50 }}>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <span style={{ fontSize: '20px', fontWeight: 900, color: theme.accent }}>baComesa</span>
+        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px' }}>
+          <Link href="/" style={{ color: theme.muted, textDecoration: 'none' }}>Browse</Link>
+          <Link href="/settings" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: theme.muted, textDecoration: 'none' }}>
+            <Settings size={16} /> Settings
+          </Link>
+          <button onClick={() => signOut(auth)} style={{ background: 'none', border: 'none', color: theme.muted, cursor: 'pointer' }}>Logout</button>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Welcome, {profile?.fullName || 'User'}</h1>
-        <p className="text-gray-500 mb-8">{isSeller ? 'Seller Dashboard' : 'Buyer Dashboard'}</p>
+      <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px 16px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px', color: theme.text }}>Welcome, {profile?.fullName || 'User'}</h1>
+        <p style={{ color: theme.muted, marginBottom: '32px' }}>{isSeller ? 'Seller Dashboard' : 'Buyer Dashboard'}</p>
 
-        {/* BUYER: Track Orders */}
+        {/* Buyer Orders */}
         {!isSeller && orders.length > 0 && (
-          <div className="bg-white rounded-2xl border p-6 mb-8 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">📦 My Orders ({orders.length})</h2>
-            <div className="space-y-4">
+          <div style={{ backgroundColor: theme.card, borderRadius: '16px', border: `1px solid ${theme.border}`, padding: '24px', marginBottom: '24px' }}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: theme.text }}>
+              <Package size={20} color={theme.accent} /> My Orders ({orders.length})
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {orders.map((o: any) => (
-                <div key={o.id} className="border rounded-xl p-4">
-                  <div className="flex items-start justify-between mb-2">
+                <div key={o.id} style={{ border: `1px solid ${theme.border}`, borderRadius: '12px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <div>
-                      <p className="font-bold text-gray-800">{o.productName}</p>
-                      <p className="text-sm text-gray-500">Seller: {o.sellerName}</p>
-                      {o.price && <p className="text-red-600 font-bold">K{Number(o.price).toLocaleString()}</p>}
+                      <p style={{ fontWeight: 700, color: theme.text }}>{o.productName}</p>
+                      <p style={{ fontSize: '13px', color: theme.muted }}>Seller: {o.sellerName}</p>
+                      {o.price && <p style={{ color: theme.accent, fontWeight: 700 }}>K{Number(o.price).toLocaleString()}</p>}
                     </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                      o.deliveryStatus === 'delivered' ? 'bg-green-100 text-green-700' :
-                      o.deliveryStatus === 'picked_up' ? 'bg-yellow-100 text-yellow-700' :
-                      o.deliveryStatus === 'assigned' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {o.deliveryStatus === 'pending' ? '⏳ Waiting for rider' :
-                       o.deliveryStatus === 'assigned' ? `🚴 ${o.riderName || 'Rider assigned'}` :
-                       o.deliveryStatus === 'picked_up' ? '📦 In transit' :
-                       o.deliveryStatus === 'delivered' ? '✅ Delivered' :
-                       o.deliveryStatus?.replace('_', ' ') || 'pending'}
+                    <span style={{
+                      padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700,
+                      backgroundColor: o.deliveryStatus === 'delivered' ? '#dcfce7' : o.deliveryStatus === 'picked_up' ? '#fef9c3' : o.deliveryStatus === 'assigned' ? '#dbeafe' : theme.border,
+                      color: o.deliveryStatus === 'delivered' ? '#166534' : o.deliveryStatus === 'picked_up' ? '#854d0e' : o.deliveryStatus === 'assigned' ? '#1e40af' : theme.muted,
+                      display: 'flex', alignItems: 'center', gap: '4px'
+                    }}>
+                      {o.deliveryStatus === 'pending' && <Clock size={12} />}
+                      {o.deliveryStatus === 'assigned' && <Bike size={12} />}
+                      {o.deliveryStatus === 'picked_up' && <Package size={12} />}
+                      {o.deliveryStatus === 'delivered' && <CheckCircle size={12} />}
+                      {o.deliveryStatus === 'pending' ? 'Waiting' : o.deliveryStatus?.replace('_', ' ') || 'pending'}
                     </span>
                   </div>
-
-                  {/* Progress Bar */}
+                  {/* Progress bar */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '12px' }}>
                     {['pending', 'assigned', 'picked_up', 'delivered'].map((status, i) => {
                       const statusOrder = ['pending', 'assigned', 'picked_up', 'delivered']
@@ -106,66 +112,65 @@ export default function DashboardPage() {
                         <div key={status} style={{ display: 'flex', alignItems: 'center', flex: i < 3 ? 1 : 0, gap: '4px' }}>
                           <div style={{
                             width: '28px', height: '28px', borderRadius: '50%',
-                            backgroundColor: isComplete ? '#e33124' : '#e5e7eb',
+                            backgroundColor: isComplete ? theme.accent : theme.border,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: 'white', fontSize: '12px', fontWeight: 700, flexShrink: 0,
+                            color: 'white', fontSize: '12px', fontWeight: 700,
                           }}>
                             {isComplete ? '✓' : i + 1}
                           </div>
                           {i < 3 && (
-                            <div style={{ flex: 1, height: '3px', backgroundColor: isComplete && i < currentIdx ? '#e33124' : '#e5e7eb', borderRadius: '2px' }} />
+                            <div style={{ flex: 1, height: '3px', backgroundColor: isComplete && i < currentIdx ? theme.accent : theme.border, borderRadius: '2px' }} />
                           )}
                         </div>
                       )
                     })}
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '10px', color: '#9ca3af' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '10px', color: theme.muted }}>
                     <span>Pending</span><span>Assigned</span><span>Picked Up</span><span>Delivered</span>
                   </div>
-
-                  {o.orderId && (
-                    <Link href={`/chat/${o.id}`} className="inline-block mt-3 text-sm text-red-600 font-bold hover:underline">
-                      💬 Chat with {o.sellerName}
-                    </Link>
-                  )}
+                  <Link href={`/chat/${o.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '12px', color: theme.accent, fontWeight: 600, textDecoration: 'none', fontSize: '13px' }}>
+                    <MessageCircle size={14} /> Chat with {o.sellerName}
+                  </Link>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* SELLER: My Products */}
+        {/* Seller Products */}
         {isSeller && (
-          <div className="bg-white rounded-2xl border p-6 mb-8 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">My Products ({products.length})</h2>
-              <Link href="/products/new" className="bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-red-700">+ Add Product</Link>
+          <div style={{ backgroundColor: theme.card, borderRadius: '16px', border: `1px solid ${theme.border}`, padding: '24px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.text, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShoppingBag size={20} color={theme.accent} /> My Products ({products.length})
+              </h2>
+              <Link href="/products/new" style={{ backgroundColor: theme.accent, color: 'white', padding: '8px 16px', borderRadius: '20px', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}>+ Add Product</Link>
             </div>
             {products.length === 0 ? (
-              <p className="text-gray-400">No products yet.</p>
+              <p style={{ color: theme.muted }}>No products yet.</p>
             ) : (
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {products.map((p: any) => (
-                  <div key={p.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <Link href={`/products/${p.id}`} className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center text-2xl overflow-hidden flex-shrink-0">
-                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : '📷'}
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', backgroundColor: theme.bg, borderRadius: '12px' }}>
+                    <Link href={`/products/${p.id}`} style={{ width: '56px', height: '56px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: theme.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {p.images?.[0] ? <img src={p.images[0]} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={24} color={theme.muted} />}
                     </Link>
-                    <div className="flex-1 min-w-0">
-                      <Link href={`/products/${p.id}`} className="font-bold text-gray-800 hover:text-red-600">{p.name}</Link>
-                      <p className="text-xs text-gray-500">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Link href={`/products/${p.id}`} style={{ fontWeight: 700, color: theme.text, textDecoration: 'none' }}>{p.name}</Link>
+                      <p style={{ fontSize: '12px', color: theme.muted }}>
                         {p.showPrice !== false && p.price ? `K${Number(p.price).toLocaleString()}` : 'Price hidden'}
-                        <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                          p.status === 'sold' ? 'bg-red-100 text-red-600' :
-                          p.status === 'archived' ? 'bg-gray-100 text-gray-500' :
-                          'bg-green-100 text-green-600'
-                        }`}>{p.status}</span>
+                        <span style={{
+                          marginLeft: '8px', padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 700,
+                          backgroundColor: p.status === 'sold' ? '#fee2e2' : p.status === 'archived' ? theme.border : '#dcfce7',
+                          color: p.status === 'sold' ? '#dc2626' : p.status === 'archived' ? theme.muted : '#16a34a',
+                        }}>{p.status}</span>
                       </p>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       {p.status === 'active' && (
-                        <button onClick={() => markAsSold(p.id)} className="text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full hover:bg-yellow-200">Mark Sold</button>
+                        <button onClick={() => markAsSold(p.id)} style={{ backgroundColor: '#fef9c3', color: '#854d0e', border: 'none', borderRadius: '10px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Mark Sold</button>
                       )}
-                      <Link href={`/products/edit/${p.id}`} className="text-xs bg-red-50 text-red-600 px-3 py-1 rounded-full hover:bg-red-100">Edit</Link>
+                      <Link href={`/products/edit/${p.id}`} style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '4px 12px', borderRadius: '10px', fontSize: '11px', fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
                     </div>
                   </div>
                 ))}
@@ -174,14 +179,16 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Profile */}
-        <div className="bg-white rounded-2xl border p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Profile</h2>
-          <div className="space-y-2 text-sm">
-            <p><span className="text-gray-400">Name:</span> <span className="text-gray-800 font-bold">{profile?.fullName || 'Not set'}</span></p>
-            <p><span className="text-gray-400">Email:</span> <span className="text-gray-800 font-bold">{user.email}</span></p>
-            <p><span className="text-gray-400">Role:</span> <span className="text-gray-800 font-bold capitalize">{profile?.role}</span></p>
-            {profile?.phoneNumber && <p><span className="text-gray-400">Phone:</span> <span className="text-gray-800 font-bold">{profile.phoneNumber}</span></p>}
+        {/* Profile Card */}
+        <div style={{ backgroundColor: theme.card, borderRadius: '16px', border: `1px solid ${theme.border}`, padding: '24px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.text, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <User size={20} color={theme.accent} /> Profile
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
+            <p style={{ margin: 0 }}><span style={{ color: theme.muted }}>Name:</span> <span style={{ color: theme.text, fontWeight: 700 }}>{profile?.fullName || 'Not set'}</span></p>
+            <p style={{ margin: 0 }}><span style={{ color: theme.muted }}>Email:</span> <span style={{ color: theme.text, fontWeight: 700 }}>{user.email}</span></p>
+            <p style={{ margin: 0 }}><span style={{ color: theme.muted }}>Role:</span> <span style={{ color: theme.text, fontWeight: 700, textTransform: 'capitalize' }}>{profile?.role}</span></p>
+            {profile?.phoneNumber && <p style={{ margin: 0 }}><span style={{ color: theme.muted }}>Phone:</span> <span style={{ color: theme.text, fontWeight: 700 }}>{profile.phoneNumber}</span></p>}
           </div>
         </div>
       </main>
