@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { onAuthStateChanged, signOut, updateEmail, updatePassword } from 'firebase/auth'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, collection, addDoc } from 'firebase/firestore'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   User, MapPin, Settings, Globe, DollarSign, Bell, Shield, Eye,
   Trash2, Star, MessageCircle, Info, Cookie, LogOut, ChevronRight,
-  Home, CreditCard, Lock
+  Home, CreditCard, Lock, X, Lightbulb, AlertTriangle
 } from 'lucide-react'
 
 export default function SettingsPage() {
@@ -18,10 +18,15 @@ export default function SettingsPage() {
   const [mounted, setMounted] = useState(false)
   const [showAccountModal, setShowAccountModal] = useState(false)
   const [showAddressModal, setShowAddressModal] = useState(false)
+  const [showAboutModal, setShowAboutModal] = useState(false)
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [message, setMessage] = useState('')
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackType, setFeedbackType] = useState<'feedback' | 'complaint'>('feedback')
+  const [feedbackSending, setFeedbackSending] = useState(false)
   const router = useRouter()
 
   useEffect(() => { setMounted(true) }, [])
@@ -54,6 +59,40 @@ export default function SettingsPage() {
     } catch (err: any) {
       setMessage('Error: ' + err.message)
     }
+  }
+
+  const handleClearCache = () => {
+    localStorage.clear()
+    sessionStorage.clear()
+    setMessage('Cache cleared successfully!')
+    setTimeout(() => setMessage(''), 3000)
+  }
+
+  const handleContactUs = () => {
+    window.open('https://wa.me/260971234567?text=Hello%20ba%20Comesa%20Support', '_blank')
+  }
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackText.trim()) return
+    setFeedbackSending(true)
+    try {
+      await addDoc(collection(db, 'feedback'), {
+        type: feedbackType,
+        message: feedbackText.trim(),
+        userEmail: user.email,
+        userId: user.uid,
+        createdAt: new Date().toISOString(),
+        resolved: false,
+      })
+      setMessage('Thank you for your feedback!')
+      setShowFeedbackModal(false)
+      setFeedbackText('')
+      setFeedbackType('feedback')
+      setTimeout(() => setMessage(''), 3000)
+    } catch (err: any) {
+      alert('Failed to send feedback: ' + err.message)
+    }
+    setFeedbackSending(false)
   }
 
   const handlePlaceholder = (feature: string) => {
@@ -89,16 +128,16 @@ export default function SettingsPage() {
     {
       section: 'Data',
       items: [
-        { icon: Trash2, label: 'Clear Cache', sublabel: 'Free up storage', action: () => handlePlaceholder('Clear cache') },
+        { icon: Trash2, label: 'Clear Cache', sublabel: 'Free up storage', action: handleClearCache },
         { icon: Cookie, label: 'Manage Cookies', sublabel: 'Control cookie preferences', action: () => handlePlaceholder('Cookie management') },
       ]
     },
     {
       section: 'Support',
       items: [
-        { icon: Star, label: 'Rating & Feedback', sublabel: 'Rate the app & send feedback', action: () => handlePlaceholder('Rating') },
-        { icon: MessageCircle, label: 'Connect to Us', sublabel: 'Contact support & social media', action: () => handlePlaceholder('Contact') },
-        { icon: Info, label: 'About ba Comesa', sublabel: 'Version, terms & privacy', action: () => handlePlaceholder('About') },
+        { icon: Star, label: 'Rating & Feedback', sublabel: 'Rate the app & send feedback', action: () => setShowFeedbackModal(true) },
+        { icon: MessageCircle, label: 'Connect to Us', sublabel: 'Contact support & social media', action: handleContactUs },
+        { icon: Info, label: 'About ba Comesa', sublabel: 'Version, terms & privacy', action: () => setShowAboutModal(true) },
       ]
     },
     {
@@ -198,6 +237,46 @@ export default function SettingsPage() {
             <h3 style={{ fontWeight: 700, marginBottom: '16px', color: '#333' }}>Address Book</h3>
             <p style={{ color: '#999', fontSize: '14px' }}>Your delivery addresses will appear here. Add an address when placing an order.</p>
             <button onClick={() => setShowAddressModal(false)} style={{ marginTop: '16px', width: '100%', padding: '12px', border: 'none', borderRadius: '8px', backgroundColor: '#e33124', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* About Modal */}
+      {showAboutModal && (
+        <div onClick={() => setShowAboutModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontWeight: 700, color: '#333' }}>About ba Comesa</h3>
+              <button onClick={() => setShowAboutModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <p style={{ fontSize: '14px', color: '#555', marginBottom: '12px' }}>Version 1.0.0</p>
+            <p style={{ fontSize: '14px', color: '#555', marginBottom: '12px' }}>ba Comesa Marketplace – Zambia's fashion hub. Buy and sell fashion with local delivery.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <Link href="/terms" style={{ color: '#e33124', textDecoration: 'none', fontSize: '14px' }}>Terms of Service</Link>
+              <Link href="/privacy" style={{ color: '#e33124', textDecoration: 'none', fontSize: '14px' }}>Privacy Policy</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div onClick={() => setShowFeedbackModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px' }}>
+            <h3 style={{ fontWeight: 700, marginBottom: '16px', color: '#333' }}>Send Feedback</h3>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <button onClick={() => setFeedbackType('feedback')} style={{ flex: 1, padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, backgroundColor: feedbackType === 'feedback' ? '#e33124' : '#f0f0f0', color: feedbackType === 'feedback' ? 'white' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <Lightbulb size={16} /> Feedback
+              </button>
+              <button onClick={() => setFeedbackType('complaint')} style={{ flex: 1, padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, backgroundColor: feedbackType === 'complaint' ? '#e33124' : '#f0f0f0', color: feedbackType === 'complaint' ? 'white' : '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <AlertTriangle size={16} /> Complaint
+              </button>
+            </div>
+            <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)} placeholder="Tell us what you think..." rows={4} style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', resize: 'none', boxSizing: 'border-box' }} />
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+              <button onClick={() => setShowFeedbackModal(false)} style={{ flex: 1, padding: '12px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: 'white', fontSize: '14px', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleSubmitFeedback} disabled={feedbackSending || !feedbackText.trim()} style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '8px', backgroundColor: '#e33124', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer', opacity: feedbackSending || !feedbackText.trim() ? 0.5 : 1 }}>Send</button>
+            </div>
           </div>
         </div>
       )}
