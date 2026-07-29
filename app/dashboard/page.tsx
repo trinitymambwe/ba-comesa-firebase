@@ -6,6 +6,7 @@ import { collection, getDocs, query, where, orderBy, doc, getDoc, updateDoc } fr
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Settings } from 'lucide-react'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
@@ -57,7 +58,10 @@ export default function DashboardPage() {
         <Link href="/" className="text-xl font-black text-red-600">baComesa</Link>
         <div className="flex items-center gap-3 text-sm">
           <Link href="/" className="text-gray-500 hover:text-red-600">Browse</Link>
-          <button onClick={() => signOut(auth)} className="text-gray-500 hover:text-red-600">Logout</button>
+<Link href="/settings" className="flex items-center gap-1 text-gray-500 hover:text-red-600">
+  <Settings size={16} /> Settings
+</Link>
+<button onClick={() => signOut(auth)} className="text-gray-500 hover:text-red-600">Logout</button>
         </div>
       </header>
 
