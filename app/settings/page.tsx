@@ -56,13 +56,17 @@ export default function SettingsPage() {
     }
   }
 
+  const handlePlaceholder = (feature: string) => {
+    alert(feature + ' is coming soon!')
+  }
+
   if (!mounted || !user) return null
 
   const menuItems = [
     {
       section: 'Account',
       items: [
-        { icon: User, label: user.email, sublabel: 'Tap to view profile', action: () => {} },
+        { icon: User, label: user.email, sublabel: 'Tap to view profile', action: () => handlePlaceholder('Profile view') },
         { icon: MapPin, label: 'Address Book', sublabel: 'Manage delivery addresses', action: () => setShowAddressModal(true) },
         { icon: Settings, label: 'Manage My Account', sublabel: 'Update email, password, phone', action: () => setShowAccountModal(true) },
       ]
@@ -70,31 +74,31 @@ export default function SettingsPage() {
     {
       section: 'Preferences',
       items: [
-        { icon: Globe, label: 'Location', sublabel: 'Zambia (ZM)', action: () => {} },
-        { icon: DollarSign, label: 'Currency', sublabel: 'ZMW (Kwacha)', action: () => {} },
-        { icon: Bell, label: 'Contact Preferences', sublabel: 'Email & push notifications', action: () => {} },
+        { icon: Globe, label: 'Location', sublabel: 'Zambia (ZM)', action: () => handlePlaceholder('Location change') },
+        { icon: DollarSign, label: 'Currency', sublabel: 'ZMW (Kwacha)', action: () => handlePlaceholder('Currency change') },
+        { icon: Bell, label: 'Contact Preferences', sublabel: 'Email & push notifications', action: () => handlePlaceholder('Contact preferences') },
       ]
     },
     {
       section: 'Privacy & Security',
       items: [
-        { icon: Shield, label: 'Blocked Contact List', sublabel: 'Manage blocked users', action: () => {} },
-        { icon: Eye, label: 'Accessibility', sublabel: 'Text size & display options', action: () => {} },
+        { icon: Shield, label: 'Blocked Contact List', sublabel: 'Manage blocked users', action: () => handlePlaceholder('Blocked contacts') },
+        { icon: Eye, label: 'Accessibility', sublabel: 'Text size & display options', action: () => handlePlaceholder('Accessibility') },
       ]
     },
     {
       section: 'Data',
       items: [
-        { icon: Trash2, label: 'Clear Cache', sublabel: 'Free up storage', action: () => {} },
-        { icon: Cookie, label: 'Manage Cookies', sublabel: 'Control cookie preferences', action: () => {} },
+        { icon: Trash2, label: 'Clear Cache', sublabel: 'Free up storage', action: () => handlePlaceholder('Clear cache') },
+        { icon: Cookie, label: 'Manage Cookies', sublabel: 'Control cookie preferences', action: () => handlePlaceholder('Cookie management') },
       ]
     },
     {
       section: 'Support',
       items: [
-        { icon: Star, label: 'Rating & Feedback', sublabel: 'Rate the app & send feedback', action: () => {} },
-        { icon: MessageCircle, label: 'Connect to Us', sublabel: 'Contact support & social media', action: () => {} },
-        { icon: Info, label: 'About ba Comesa', sublabel: 'Version, terms & privacy', action: () => {} },
+        { icon: Star, label: 'Rating & Feedback', sublabel: 'Rate the app & send feedback', action: () => handlePlaceholder('Rating') },
+        { icon: MessageCircle, label: 'Connect to Us', sublabel: 'Contact support & social media', action: () => handlePlaceholder('Contact') },
+        { icon: Info, label: 'About ba Comesa', sublabel: 'Version, terms & privacy', action: () => handlePlaceholder('About') },
       ]
     },
     {
