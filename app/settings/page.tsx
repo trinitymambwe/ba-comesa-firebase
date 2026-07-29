@@ -149,19 +149,19 @@ export default function SettingsPage() {
                     width: '100%', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px',
                     border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
                     borderBottom: ii < section.items.length - 1 ? '1px solid #f0f0f0' : 'none',
-                    color: item.danger ? '#e33124' : '#333',
+                    color: (item as any).danger ? '#e33124' : '#333',
                   }}
                 >
-                  <item.icon size={20} color={item.danger ? '#e33124' : '#666'} />
+                  <item.icon size={20} color={(item as any).danger ? '#e33124' : '#666'} />
                   <div style={{ flex: 1, textAlign: 'left' }}>
-                    <p style={{ fontWeight: 500, fontSize: '14px', margin: 0, color: item.danger ? '#e33124' : '#333' }}>
+                    <p style={{ fontWeight: 500, fontSize: '14px', margin: 0, color: (item as any).danger ? '#e33124' : '#333' }}>
                       {item.label}
                     </p>
                     {item.sublabel && (
                       <p style={{ fontSize: '12px', color: '#999', margin: '2px 0 0' }}>{item.sublabel}</p>
                     )}
                   </div>
-                  {!item.danger && <ChevronRight size={16} color="#ccc" />}
+                  {!(item as any).danger && <ChevronRight size={16} color="#ccc" />}
                 </button>
               ))}
             </div>
