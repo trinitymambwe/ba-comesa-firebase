@@ -179,6 +179,30 @@ export default function DashboardPage() {
           </div>
         )}
 
+{/* Become a Seller Card */}
+{!isSeller && (
+  <div style={{ backgroundColor: theme.card, borderRadius: '16px', border: `1px solid ${theme.border}`, padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+    <div style={{ width: '60px', height: '60px', borderRadius: '30px', backgroundColor: `${theme.accent}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+      <ShoppingBag size={28} color={theme.accent} />
+    </div>
+    <h3 style={{ fontWeight: 700, fontSize: '18px', color: theme.text, marginBottom: '4px' }}>Start Selling on baComesa</h3>
+    <p style={{ color: theme.muted, fontSize: '13px', marginBottom: '16px' }}>List your fashion items and reach customers across Zambia</p>
+    <button
+      onClick={async () => {
+        await updateDoc(doc(db, 'profiles', user.uid), { role: 'seller' })
+        window.location.reload()
+      }}
+      style={{
+        backgroundColor: theme.accent, color: 'white', border: 'none',
+        padding: '12px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '14px',
+        cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px'
+      }}
+    >
+      <ShoppingBag size={16} /> Become a Seller
+    </button>
+  </div>
+)}
+
         {/* Profile Card */}
         <div style={{ backgroundColor: theme.card, borderRadius: '16px', border: `1px solid ${theme.border}`, padding: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.text, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
