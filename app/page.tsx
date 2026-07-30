@@ -275,20 +275,21 @@ const { theme } = useGlobalTheme()
         )}
       </div>
 
-      {/* MOBILE BOTTOM NAV */}
-      {isMobile && user && (
-        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: cardBg, borderTop: `1px solid ${borderColor}`, display: 'flex', justifyContent: 'space-around', padding: '8px 0', zIndex: 50 }}>
-          <Link href="/" style={{ color: accent, textDecoration: 'none', textAlign: 'center', fontSize: '10px', fontWeight: 600 }}>
-            <Home size={20} color={accent} /> <div>Home</div>
-          </Link>
-          <Link href="/wishlist" style={{ color: mutedText, textDecoration: 'none', textAlign: 'center', fontSize: '10px' }}>
-            <Heart size={20} /> <div>Wishlist</div>
-          </Link>
-          <Link href="/dashboard" style={{ color: mutedText, textDecoration: 'none', textAlign: 'center', fontSize: '10px' }}>
-            <User size={20} /> <div>Account</div>
-          </Link>
-        </div>
-      )}
+     {/* MOBILE BOTTOM NAV */}
+{isMobile && user && (
+  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: cardBg, borderTop: `1px solid ${borderColor}`, display: 'flex', justifyContent: 'space-around', padding: '6px 0 10px', zIndex: 50 }}>
+    <Link href="/" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: accent, textDecoration: 'none', fontSize: '10px', fontWeight: 600 }}>
+      <Home size={22} color={accent} /> <span>Home</span>
+    </Link>
+    <Link href="/wishlist" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: mutedText, textDecoration: 'none', fontSize: '10px' }}>
+      <Heart size={22} color={mutedText} /> <span>Wishlist</span>
+    </Link>
+    <Link href="/dashboard" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: mutedText, textDecoration: 'none', fontSize: '10px' }}>
+      <User size={22} color={mutedText} /> <span>Account</span>
+    </Link>
+  </div>
+)}
+{isMobile && <div style={{ height: '56px' }} />}
 
       {!isMobile && (
         <footer style={{ backgroundColor: '#060f1a', borderTop: `1px solid ${borderColor}`, textAlign: 'center', padding: '24px', fontSize: '13px', marginTop: '40px' }}>
