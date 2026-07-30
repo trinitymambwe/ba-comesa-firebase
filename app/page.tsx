@@ -6,8 +6,9 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles, Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp } from 'lucide-react'
-import { useTheme } from './components/ThemeSwitcher'
 import ThemeSwitcher from './components/ThemeSwitcher'
+import { useGlobalTheme } from './context/ThemeContext'
+
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [products, setProducts] = useState<any[]>([])
@@ -17,11 +18,8 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [windowWidth, setWindowWidth] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
-import { useGlobalTheme } from '@/context/ThemeContext'
-// inside component:
+ const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
 const { theme } = useGlobalTheme()
-  
 
   const bgColor = theme.bg
   const cardBg = theme.card

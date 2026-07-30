@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Palette } from 'lucide-react'
-import { useGlobalTheme } from '@/context/ThemeContext'
+import { useGlobalTheme } from '../context/ThemeContext'
 
 export default function ThemeSwitcher() {
   const [open, setOpen] = useState(false)

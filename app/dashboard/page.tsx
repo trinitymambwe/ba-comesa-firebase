@@ -7,7 +7,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Settings, Package, ShoppingBag, Clock, CheckCircle, User, Bike, ChevronRight, MessageCircle } from 'lucide-react'
-import { useGlobalTheme } from '@/context/ThemeContext'
+import { useGlobalTheme } from '../context/ThemeContext'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)

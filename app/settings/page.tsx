@@ -11,7 +11,7 @@ import {
   Trash2, Star, MessageCircle, Info, Cookie, LogOut, ChevronRight,
   Home, CreditCard, Lock, X, Lightbulb, AlertTriangle, Palette
 } from 'lucide-react'
-import { useGlobalTheme } from '@/context/ThemeContext'
+import { useGlobalTheme } from '../context/ThemeContext'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)
