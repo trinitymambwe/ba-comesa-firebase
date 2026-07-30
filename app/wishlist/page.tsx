@@ -5,10 +5,13 @@ import { db, auth } from '@/lib/firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import Link from 'next/link'
+import { Heart, ShoppingBag, ChevronLeft } from 'lucide-react'
+import { useGlobalTheme } from '../context/ThemeContext'
 
 export default function WishlistPage() {
   const [user, setUser] = useState<any>(null)
   const [items, setItems] = useState<any[]>([])
+  const { theme } = useGlobalTheme()
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u: any) => setUser(u))
@@ -26,34 +29,39 @@ export default function WishlistPage() {
   }, [user])
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFF8F0' }}>
-      <nav className="sticky top-0 z-50 border-b" style={{ backgroundColor: '#FFF8F0', borderColor: '#FAA307' }}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-black"><span style={{ color: '#E85D04' }}>ba</span> <span style={{ color: '#370617' }}>Comesa</span></Link>
-          <Link href="/dashboard" className="font-medium" style={{ color: '#370617' }}>← Dashboard</Link>
-        </div>
-      </nav>
+    <div style={{ minHeight: '100vh', backgroundColor: theme.bg, color: theme.text }}>
+      {/* Header */}
+      <div style={{ backgroundColor: theme.accent, color: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none', display: 'flex' }}>
+          <ChevronLeft size={20} />
+        </Link>
+        <span style={{ fontWeight: 700, fontSize: '18px' }}>My Wishlist ({items.length})</span>
+      </div>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-black mb-8" style={{ color: '#370617' }}>My Wishlist ({items.length})</h1>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
         {items.length === 0 ? (
-          <div className="text-center py-20 rounded-3xl" style={{ backgroundColor: '#FAA307', opacity: 0.1 }}>
-            <p style={{ color: '#370617', opacity: 0.5 }}>Your wishlist is empty.</p>
-            <Link href="/" className="inline-block mt-4 font-bold" style={{ color: '#E85D04' }}>Browse Products →</Link>
+          <div style={{ textAlign: 'center', padding: '60px 20px', borderRadius: '16px', backgroundColor: theme.card, border: `1px solid ${theme.border}` }}>
+            <Heart size={48} style={{ color: theme.muted, marginBottom: '12px' }} />
+            <p style={{ color: theme.muted, fontSize: '16px' }}>Your wishlist is empty.</p>
+            <Link href="/" style={{ color: theme.accent, fontWeight: 600, marginTop: '8px', display: 'inline-block', textDecoration: 'none' }}>Browse Products →</Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
             {items.map((item: any) => (
-              <Link key={item.id} href={`/products/${item.productId}`} className="bg-white rounded-2xl overflow-hidden shadow-sm border" style={{ borderColor: '#FAA307' }}>
-                <div className="aspect-square flex items-center justify-center text-5xl" style={{ backgroundColor: '#FFF8F0' }}>👗</div>
-                <div className="p-4">
-                  <p className="font-bold" style={{ color: '#370617' }}>{item.productName || 'Product'}</p>
+              <Link key={item.id} href={`/products/${item.productId}`} style={{ textDecoration: 'none' }}>
+                <div style={{ backgroundColor: theme.card, borderRadius: '8px', overflow: 'hidden', border: `1px solid ${theme.border}`, transition: 'box-shadow 0.2s', cursor: 'pointer' }}>
+                  <div style={{ aspectRatio: '1', backgroundColor: theme.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShoppingBag size={40} style={{ color: theme.muted }} />
+                  </div>
+                  <div style={{ padding: '10px' }}>
+                    <p style={{ fontSize: '13px', color: theme.text, fontWeight: 500 }}>{item.productName || 'Product'}</p>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }

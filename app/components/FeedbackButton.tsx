@@ -30,7 +30,7 @@ export default function FeedbackButton() {
 
   return (
     <>
-      <button onClick={() => setOpen(!open)} style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 100, backgroundColor: '#e33124', color: 'white', border: 'none', borderRadius: '50%', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
+      <button onClick={() => setOpen(!open)} style={{ position: 'fixed', bottom: '100px', right: '20px', zIndex: 100, backgroundColor: '#e33124', color: 'white', border: 'none', borderRadius: '50%', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
         <MessageCircle size={24} />
       </button>
       {open && (

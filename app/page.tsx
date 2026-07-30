@@ -6,7 +6,6 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import { Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles, Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp } from 'lucide-react'
-import ThemeSwitcher from './components/ThemeSwitcher'
 import { useGlobalTheme } from './context/ThemeContext'
 
 export default function HomePage() {
@@ -289,11 +288,6 @@ const { theme } = useGlobalTheme()
             <User size={20} /> <div>Account</div>
           </Link>
         </div>
-      )}
-
-      {/* THEME SWITCHER */}
-      {typeof window !== 'undefined' && (
-        <ThemeSwitcher />
       )}
 
       {!isMobile && (
