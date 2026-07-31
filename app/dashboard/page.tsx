@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Settings, Package, ShoppingBag, Clock, CheckCircle, User, Bike, ChevronRight, MessageCircle } from 'lucide-react'
 import { useGlobalTheme } from '../context/ThemeContext'
+import { updateDoc } from 'firebase/firestore'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
@@ -188,10 +189,17 @@ export default function DashboardPage() {
     <h3 style={{ fontWeight: 700, fontSize: '18px', color: theme.text, marginBottom: '4px' }}>Start Selling on baComesa</h3>
     <p style={{ color: theme.muted, fontSize: '13px', marginBottom: '16px' }}>List your fashion items and reach customers across Zambia</p>
     <button
-      onClick={async () => {
-        await updateDoc(doc(db, 'profiles', user.uid), { role: 'seller' })
-        window.location.reload()
-      }}
+    onClick={async () => {
+  alert('Button clicked! Converting to seller...')
+  try {
+    await updateDoc(doc(db, 'profiles', user.uid), { role: 'seller' })
+    alert('Done! Reloading...')
+    window.location.reload()
+  } catch (err: any) {
+    alert('Error: ' + err.message)
+  }
+}}
+
       style={{
         backgroundColor: theme.accent, color: 'white', border: 'none',
         padding: '12px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '14px',
