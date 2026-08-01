@@ -2,55 +2,62 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export interface Theme {
-  name: string
-  bg: string
-  card: string
-  accent: string
-  text: string
-  muted: string
-  border: string
+const lightTheme = {
+  mode: 'light' as const,
+  bg: '#f8fafc',
+  card: '#ffffff',
+  accent: '#1a73e8',
+  text: '#1e293b',
+  muted: '#64748b',
+  border: '#e2e8f0',
+  navBg: '#ffffff',
+  headerBg: '#1a73e8',
 }
 
-const themes: Theme[] = [
-  { name: 'Dark Navy', bg: '#0d1b2a', card: '#0a1628', accent: '#e85d04', text: '#e0e0e0', muted: '#9ca3af', border: '#1e3a5f' },
-  { name: 'Light AliExpress', bg: '#f5f5f5', card: '#ffffff', accent: '#e33124', text: '#333333', muted: '#999999', border: '#e8e8e8' },
-  { name: 'Midnight Purple', bg: '#1a1a2e', card: '#16162a', accent: '#a855f7', text: '#e0e0e0', muted: '#9ca3af', border: '#2d2d4a' },
-  { name: 'Forest Green', bg: '#0d1f0d', card: '#0a1a0a', accent: '#22c55e', text: '#e0e0e0', muted: '#9ca3af', border: '#1a3a1a' },
-  { name: 'Warm Cream', bg: '#fff8f0', card: '#ffffff', accent: '#e85d04', text: '#370617', muted: '#9ca3af', border: '#faa307' },
-  { name: 'Ocean Blue', bg: '#0c1929', card: '#0f1f3a', accent: '#06b6d4', text: '#e0e0e0', muted: '#9ca3af', border: '#1a3050' },
-]
+const darkTheme = {
+  mode: 'dark' as const,
+  bg: '#0f172a',
+  card: '#1e293b',
+  accent: '#3b82f6',
+  text: '#e2e8f0',
+  muted: '#94a3b8',
+  border: '#334155',
+  navBg: '#1e293b',
+  headerBg: '#1e3a5f',
+}
+
+type Theme = typeof lightTheme | typeof darkTheme
 
 interface ThemeContextType {
   theme: Theme
-  setTheme: (theme: Theme) => void
-  themes: Theme[]
+  toggleTheme: () => void
+  isDark: boolean
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: themes[0],
-  setTheme: () => {},
-  themes,
+  theme: lightTheme,
+  toggleTheme: () => {},
+  isDark: false,
 })
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(themes[0])
+  const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('ba-comesa-theme')
-    if (saved) {
-      const found = themes.find(t => t.name === saved)
-      if (found) setThemeState(found)
-    }
+    const saved = localStorage.getItem('ba-comesa-dark-mode')
+    if (saved === 'true') setIsDark(true)
   }, [])
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme)
-    localStorage.setItem('ba-comesa-theme', newTheme.name)
+  const toggleTheme = () => {
+    const next = !isDark
+    setIsDark(next)
+    localStorage.setItem('ba-comesa-dark-mode', String(next))
   }
 
+  const theme = isDark ? darkTheme : lightTheme
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, themes }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, isDark }}>
       {children}
     </ThemeContext.Provider>
   )

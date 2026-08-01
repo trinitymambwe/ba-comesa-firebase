@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import {
   User, MapPin, Settings, Globe, DollarSign, Bell, Shield, Eye,
   Trash2, Star, MessageCircle, Info, Cookie, LogOut, ChevronRight,
-  Home, CreditCard, Lock, X, Lightbulb, AlertTriangle, Palette
+  Home, CreditCard, Lock, X, Lightbulb, AlertTriangle
 } from 'lucide-react'
 import { useGlobalTheme } from '../context/ThemeContext'
 
@@ -21,7 +21,6 @@ export default function SettingsPage() {
   const [showAddressModal, setShowAddressModal] = useState(false)
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
-  const [showThemeModal, setShowThemeModal] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPhone, setNewPhone] = useState('')
@@ -31,7 +30,7 @@ export default function SettingsPage() {
   const [feedbackSending, setFeedbackSending] = useState(false)
   const router = useRouter()
 
-  const { theme, setTheme, themes } = useGlobalTheme()
+  const { theme, toggleTheme, isDark } = useGlobalTheme()
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -126,7 +125,7 @@ export default function SettingsPage() {
       section: 'Privacy & Security',
       items: [
         { icon: Shield, label: 'Blocked Contact List', sublabel: 'Manage blocked users', action: () => handlePlaceholder('Blocked contacts') },
-        { icon: Eye, label: 'Accessibility', sublabel: 'Theme & display options', action: () => setShowThemeModal(true) },
+        { icon: Eye, label: 'Accessibility', sublabel: isDark ? 'Dark mode on' : 'Light mode on', action: toggleTheme },
       ]
     },
     {
@@ -161,7 +160,6 @@ export default function SettingsPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: bg }}>
-      {/* Header */}
       <div style={{ backgroundColor: accent, color: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none', display: 'flex' }}>
           <ChevronRight size={20} style={{ transform: 'rotate(180deg)' }} />
@@ -169,14 +167,12 @@ export default function SettingsPage() {
         <span style={{ fontWeight: 700, fontSize: '18px' }}>Settings</span>
       </div>
 
-      {/* Success Message */}
       {message && (
         <div style={{ padding: '12px 20px', backgroundColor: '#22c55e', color: 'white', fontSize: '14px', textAlign: 'center' }}>
           {message}
         </div>
       )}
 
-      {/* Profile Card */}
       <div style={{ backgroundColor: card, margin: '12px 16px', borderRadius: '12px', padding: '20px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', border: `1px solid ${border}` }}>
         <div style={{ width: '50px', height: '50px', borderRadius: '25px', backgroundColor: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '20px' }}>
           {(profile?.fullName || user.email)[0]?.toUpperCase()}
@@ -187,7 +183,6 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Menu Sections */}
       <div style={{ padding: '0 16px 40px' }}>
         {menuItems.map((section, si) => (
           <div key={si} style={{ marginBottom: '16px' }}>
@@ -223,40 +218,6 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      {/* Theme Picker Modal (Accessibility) */}
-      {showThemeModal && (
-        <div onClick={() => setShowThemeModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: card, border: `1px solid ${border}`, borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '380px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontWeight: 700, color: text, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Palette size={20} color={accent} /> Choose Theme
-              </h3>
-              <button onClick={() => setShowThemeModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: muted }}><X size={20} /></button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {themes.map(t => (
-                <button
-                  key={t.name}
-                  onClick={() => { setTheme(t); setShowThemeModal(false) }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '12px 16px', borderRadius: '12px',
-                    border: theme.name === t.name ? `2px solid ${t.accent}` : `1px solid ${border}`,
-                    backgroundColor: t.bg, color: t.text,
-                    cursor: 'pointer', fontSize: '14px', fontWeight: 600,
-                  }}
-                >
-                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: t.accent, flexShrink: 0 }} />
-                  {t.name}
-                  {theme.name === t.name && <span style={{ marginLeft: 'auto', color: t.accent }}>✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Manage Account Modal */}
       {showAccountModal && (
         <div onClick={() => setShowAccountModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: card, borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px', border: `1px solid ${border}` }}>
@@ -274,7 +235,6 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Address Book Modal */}
       {showAddressModal && (
         <div onClick={() => setShowAddressModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: card, borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px', border: `1px solid ${border}` }}>
@@ -285,7 +245,6 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* About Modal */}
       {showAboutModal && (
         <div onClick={() => setShowAboutModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: card, borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px', border: `1px solid ${border}` }}>
@@ -303,7 +262,6 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Feedback Modal */}
       {showFeedbackModal && (
         <div onClick={() => setShowFeedbackModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: card, borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '400px', border: `1px solid ${border}` }}>
