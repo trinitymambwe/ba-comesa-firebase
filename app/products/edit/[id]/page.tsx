@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 export default function EditProductPage() {
   const { id } = useParams()

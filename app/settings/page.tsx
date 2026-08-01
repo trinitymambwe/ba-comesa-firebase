@@ -12,6 +12,7 @@ import {
   Home, CreditCard, Lock, X, Lightbulb, AlertTriangle
 } from 'lucide-react'
 import { useGlobalTheme } from '../context/ThemeContext'
+import Logo from '@/components/Logo'
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null)

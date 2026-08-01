@@ -11,6 +11,7 @@ import {
   X, ZoomIn, ZoomOut, Truck, Camera, CheckCircle, AlertTriangle, User
 } from 'lucide-react'
 import LocationPicker from '../../components/LocationPicker'
+import Logo from '@/components/Logo'
 
 export default function ProductPage() {
   const { id } = useParams()
@@ -75,7 +76,7 @@ export default function ProductPage() {
 
   if (!mounted || loading) return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+      <img src="<Logo height={...} />." alt="Loading" style={{ width: '60px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
     </div>
   )
 
@@ -97,7 +98,7 @@ export default function ProductPage() {
       {/* Header */}
       <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '10px 20px' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <Link href="/"><img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px' }} /></Link>
+          <Link href="/"><img src="<Logo height={...} />." alt="ba Comesa" style={{ height: '24px' }} /></Link>
         </div>
       </header>
 
@@ -266,7 +267,7 @@ export default function ProductPage() {
       )}
 
       <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '16px', fontSize: '12px', marginTop: '40px' }}>
-        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
+        <img src="<Logo height={...} />." alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
         <p>© {new Date().getFullYear()} ba Comesa Marketplace</p>
       </footer>
     </div>

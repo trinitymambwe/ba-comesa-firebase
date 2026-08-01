@@ -7,10 +7,10 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
 import {
   Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles,
-  Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp,
-  Sun, Moon
+  Truck, Crown, MapPin, User, Home, TrendingUp, Sun, Moon
 } from 'lucide-react'
 import { useGlobalTheme } from './context/ThemeContext'
+import Logo from './components/Logo'
 
 export default function HomePage() {
   const [user, setUser] = useState<any>(null)
@@ -69,8 +69,7 @@ export default function HomePage() {
   )
 
   const isMobile = windowWidth < 768
-  const isTablet = windowWidth >= 768 && windowWidth < 1024
-  const gridColumns = isMobile ? 2 : isTablet ? 3 : 5
+  const gridColumns = isMobile ? 2 : windowWidth >= 768 && windowWidth < 1024 ? 3 : 5
 
   const getBadge = (index: number) => {
     const badges = [
@@ -93,9 +92,8 @@ export default function HomePage() {
   if (!logoDone) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: bgColor, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ width: isMobile ? '140px' : '180px', marginBottom: '20px', animation: 'pulseLogo 1.5s ease-in-out infinite' }} />
-        <p style={{ color: accent, fontWeight: 700, fontSize: isMobile ? '14px' : '16px', letterSpacing: '2px' }}>Style Meets Community</p>
-        <style jsx>{`@keyframes pulseLogo{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:1}}`}</style>
+        <Logo height={80} />
+        <p style={{ color: accent, fontWeight: 700, fontSize: '16px', letterSpacing: '2px', marginTop: '20px' }}>Style Meets Community</p>
       </div>
     )
   }
@@ -111,16 +109,16 @@ export default function HomePage() {
           backdropFilter: 'blur(4px)', zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', animation: 'pulseLogo 1.2s infinite' }} />
+          <Logo height={60} />
         </div>
       )}
 
       {/* TOP BAR */}
       {!isMobile && (
-        <div style={{ backgroundColor: '#060f1a', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${borderColor}` }}>
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: mutedText }}><MapPin size={12} color={accent} /> Zambia</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: mutedText }}><ShoppingBag size={12} color={accent} /> Marketplace</span>
+        <div style={{ backgroundColor: '#0a0a0a', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${borderColor}` }}>
+          <div style={{ display: 'flex', gap: '20px', color: mutedText }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={12} color="#ff7300" /> Zambia</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><ShoppingBag size={12} color="#ff7300" /> Marketplace</span>
           </div>
           <div style={{ display: 'flex', gap: '16px', color: mutedText }}>
             {user ? (
@@ -139,34 +137,32 @@ export default function HomePage() {
       <header style={{ backgroundColor: cardBg, borderBottom: `1px solid ${borderColor}`, position: 'sticky', top: 0, zIndex: 50, padding: isMobile ? '8px 12px' : '12px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '20px' }}>
           <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-            <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: isMobile ? '24px' : '32px' }} />
+            <Logo height={isMobile ? 28 : 34} />
           </Link>
           {!isMobile && (
             <div style={{ flex: 1, maxWidth: '600px', position: 'relative' }}>
               <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search products..."
                 style={{ width: '100%', padding: '10px 45px 10px 16px', borderRadius: '20px', border: `2px solid ${accent}`, outline: 'none', fontSize: '14px', boxSizing: 'border-box', backgroundColor: bgColor, color: textColor }} />
-              <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: accent, color: 'white', padding: '6px 14px', borderRadius: '16px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: '#ff7300', color: 'white', padding: '6px 14px', borderRadius: '16px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Search size={14} /> Search
               </span>
             </div>
           )}
           {!isMobile && (
             <nav style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px', whiteSpace: 'nowrap' }}>
-              {/* Dark/Light Toggle */}
               <button onClick={toggleTheme} style={{ background: 'none', border: `1px solid ${borderColor}`, borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: textColor }}>
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-
               {user ? (
                 <>
                   <Link href="/wishlist" style={{ color: mutedText, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Heart size={16} color={accent} /> Wishlist
+                    <Heart size={16} color="#ff7300" /> Wishlist
                   </Link>
-                  <Link href="/dashboard" style={{ backgroundColor: accent, color: 'white', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Dashboard</Link>
+                  <Link href="/dashboard" style={{ backgroundColor: '#ff7300', color: 'white', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Dashboard</Link>
                 </>
               ) : (
-                <Link href="/auth/signup" style={{ backgroundColor: accent, color: 'white', padding: '8px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Join Free</Link>
+                <Link href="/auth/signup" style={{ backgroundColor: '#ff7300', color: 'white', padding: '8px 20px', borderRadius: '20px', textDecoration: 'none', fontWeight: 600, fontSize: '12px' }}>Join Free</Link>
               )}
             </nav>
           )}
@@ -197,9 +193,9 @@ export default function HomePage() {
       {!loading && flashDeals.length > 0 && !isMobile && (
         <div style={{ backgroundColor: cardBg, margin: '12px 20px', borderRadius: '12px', padding: '16px 20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto', border: `1px solid ${borderColor}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <Zap size={20} color={accent} />
+            <Zap size={20} color="#ff7300" />
             <h3 style={{ fontSize: '18px', fontWeight: 700, color: textColor, margin: 0 }}>Flash Deals</h3>
-            <span style={{ backgroundColor: accent, color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, animation: 'pulse 1s infinite' }}>ENDING SOON</span>
+            <span style={{ backgroundColor: '#ff7300', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, animation: 'pulse 1s infinite' }}>ENDING SOON</span>
           </div>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
             {flashDeals.map((p: any) => (
@@ -214,7 +210,7 @@ export default function HomePage() {
                     )}
                   </div>
                   <div style={{ padding: '8px' }}>
-                    <p style={{ fontSize: '16px', fontWeight: 700, color: accent, margin: '0 0 2px' }}>
+                    <p style={{ fontSize: '16px', fontWeight: 700, color: '#ff7300', margin: '0 0 2px' }}>
                       K{Number((p.price || 100) * 0.7).toLocaleString()}
                     </p>
                     {p.price && (
@@ -234,14 +230,14 @@ export default function HomePage() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '12px' : '12px 20px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '10px' : '16px' }}>
           <h2 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: 700, color: textColor, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <TrendingUp size={20} color={accent} /> Trending Now
+            <TrendingUp size={20} color="#ff7300" /> Trending Now
           </h2>
-          {user && <Link href="/products/new" style={{ color: accent, textDecoration: 'none', fontSize: isMobile ? '12px' : '13px', fontWeight: 600 }}>+ Sell</Link>}
+          {user && <Link href="/products/new" style={{ color: '#ff7300', textDecoration: 'none', fontSize: isMobile ? '12px' : '13px', fontWeight: 600 }}>+ Sell</Link>}
         </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px' }}>
-            <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', opacity: 0.5, animation: 'pulseLogo 1.5s infinite' }} />
+            <Logo height={60} />
             <p style={{ color: mutedText, marginTop: '12px', fontSize: '13px' }}>Loading products...</p>
           </div>
         ) : filtered.length === 0 ? (
@@ -318,14 +314,13 @@ export default function HomePage() {
       {isMobile && <div style={{ height: '56px' }} />}
 
       {!isMobile && (
-        <footer style={{ backgroundColor: '#060f1a', borderTop: `1px solid ${borderColor}`, textAlign: 'center', padding: '24px', fontSize: '13px', marginTop: '40px' }}>
-          <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '24px', marginBottom: '8px' }} />
-          <p style={{ color: mutedText }}>© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
+        <footer style={{ backgroundColor: '#0a0a0a', borderTop: `1px solid ${borderColor}`, textAlign: 'center', padding: '24px', fontSize: '13px', marginTop: '40px' }}>
+          <Logo height={28} />
+          <p style={{ color: mutedText, marginTop: '12px' }}>© {new Date().getFullYear()} Kwenyu Store. All rights reserved.</p>
         </footer>
       )}
 
       <style jsx>{`
-        @keyframes pulseLogo { 0%,100% { transform:scale(1); opacity:.9 } 50% { transform:scale(1.05); opacity:1 } }
         @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.7 } }
       `}</style>
     </div>

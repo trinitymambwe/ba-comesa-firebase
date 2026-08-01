@@ -46,7 +46,7 @@ export default function LoginPage() {
       {/* Header */}
       <header style={{ backgroundColor: 'white', borderBottom: '1px solid #e8e8e8', padding: '16px 20px', textAlign: 'center' }}>
         <Link href="/">
-          <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '32px' }} />
+          <img src="<Logo height={...} />." alt="ba Comesa" style={{ height: '32px' }} />
         </Link>
       </header>
 
@@ -112,7 +112,7 @@ export default function LoginPage() {
       </div>
 
       <footer style={{ backgroundColor: '#333', color: '#999', textAlign: 'center', padding: '16px', fontSize: '12px' }}>
-        <img src="https://i.imgur.com/geFkr2n.png" alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
+        <img src="<Logo height={...} />." alt="ba Comesa" style={{ height: '18px', marginBottom: '4px' }} />
         <p>© {new Date().getFullYear()} ba Comesa Marketplace</p>
       </footer>
     </div>

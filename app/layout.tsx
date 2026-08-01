@@ -4,13 +4,13 @@ import './globals.css'
 import { AuthProvider } from '@/lib/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import FeedbackButton from './components/FeedbackButton'
-import TrackVisit from '@/lib/trackVisit'
+import TrackVisit from './lib/trackVisit'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ba Comesa Marketplace',
-  description: 'Discover fashion and accessories from local sellers.',
+  title: 'Kwenyu Store',
+  description: 'Zambia\'s fashion marketplace — buy, sell, and deliver.',
   other: {
     'google-site-verification': 'iVyrYBU9sQXO3rCvd5GvWIJ8zah3W6ksvr6OqEL2kdM',
   },
