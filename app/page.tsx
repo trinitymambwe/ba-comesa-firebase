@@ -5,7 +5,11 @@ import { db, auth } from '@/lib/firebase'
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import Link from 'next/link'
-import { Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles, Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp } from 'lucide-react'
+import {
+  Search, Heart, ShoppingBag, Zap, Star, Flame, Sparkles,
+  Truck, Crown, MapPin, User, Home, MessageCircle, TrendingUp,
+  Sun, Moon
+} from 'lucide-react'
 import { useGlobalTheme } from './context/ThemeContext'
 
 export default function HomePage() {
@@ -17,8 +21,10 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [windowWidth, setWindowWidth] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
- const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
-const { theme } = useGlobalTheme()
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null)
+  const [navigating, setNavigating] = useState(false)
+
+  const { theme, toggleTheme, isDark } = useGlobalTheme()
 
   const bgColor = theme.bg
   const cardBg = theme.card
@@ -98,6 +104,17 @@ const { theme } = useGlobalTheme()
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: bgColor, color: textColor }}>
+      {/* Navigating Overlay */}
+      {navigating && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(255,255,255,0.7)',
+          backdropFilter: 'blur(4px)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <img src="https://i.imgur.com/geFkr2n.png" alt="Loading" style={{ width: '60px', animation: 'pulseLogo 1.2s infinite' }} />
+        </div>
+      )}
+
       {/* TOP BAR */}
       {!isMobile && (
         <div style={{ backgroundColor: '#060f1a', fontSize: '12px', padding: '6px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${borderColor}` }}>
@@ -136,6 +153,11 @@ const { theme } = useGlobalTheme()
           )}
           {!isMobile && (
             <nav style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px', whiteSpace: 'nowrap' }}>
+              {/* Dark/Light Toggle */}
+              <button onClick={toggleTheme} style={{ background: 'none', border: `1px solid ${borderColor}`, borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: textColor }}>
+                {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+
               {user ? (
                 <>
                   <Link href="/wishlist" style={{ color: mutedText, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -155,7 +177,8 @@ const { theme } = useGlobalTheme()
       <div style={{ backgroundColor: cardBg, borderBottom: `1px solid ${borderColor}`, padding: '8px 20px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '24px', fontSize: '13px', overflowX: 'auto' }}>
           {[{ name: 'Dresses', slug: 'dresses' }, { name: 'Shoes', slug: 'shoes' }, { name: 'Bags', slug: 'bags' }, { name: 'Accessories', slug: 'accessories' }, { name: 'Trending', slug: 'trending' }].map(cat => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`} style={{ color: mutedText, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}>
+            <Link key={cat.slug} href={`/category/${cat.slug}`} onClick={() => setNavigating(true)}
+              style={{ color: mutedText, textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}>
               {cat.name}
             </Link>
           ))}
@@ -180,7 +203,8 @@ const { theme } = useGlobalTheme()
           </div>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
             {flashDeals.map((p: any) => (
-              <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: 'none', minWidth: '160px', flex: '0 0 auto' }}>
+              <Link key={p.id} href={`/products/${p.id}`} onClick={() => setNavigating(true)}
+                style={{ textDecoration: 'none', minWidth: '160px', flex: '0 0 auto' }}>
                 <div style={{ backgroundColor: bgColor, borderRadius: '8px', overflow: 'hidden', border: `1px solid ${borderColor}` }}>
                   <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {p.images?.[0] ? (
@@ -233,7 +257,9 @@ const { theme } = useGlobalTheme()
               const isHovered = hoveredProduct === p.id
 
               return (
-                <Link key={p.id} href={`/products/${p.id}`} style={{ textDecoration: 'none' }}
+                <Link key={p.id} href={`/products/${p.id}`}
+                  onClick={() => setNavigating(true)}
+                  style={{ textDecoration: 'none' }}
                   onMouseEnter={() => setHoveredProduct(p.id)}
                   onMouseLeave={() => setHoveredProduct(null)}>
                   <div style={{
@@ -275,21 +301,21 @@ const { theme } = useGlobalTheme()
         )}
       </div>
 
-     {/* MOBILE BOTTOM NAV */}
-{isMobile && user && logoDone && (
-  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: cardBg, borderTop: `1px solid ${borderColor}`, display: 'flex', justifyContent: 'space-around', padding: '6px 0 10px', zIndex: 50 }}>
-    <Link href="/" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: accent, textDecoration: 'none', fontSize: '10px', fontWeight: 600 }}>
-      <Home size={22} color={accent} /> <span>Home</span>
-    </Link>
-    <Link href="/wishlist" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: mutedText, textDecoration: 'none', fontSize: '10px' }}>
-      <Heart size={22} color={mutedText} /> <span>Wishlist</span>
-    </Link>
-    <Link href="/dashboard" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: mutedText, textDecoration: 'none', fontSize: '10px' }}>
-      <User size={22} color={mutedText} /> <span>Account</span>
-    </Link>
-  </div>
-)}
-{isMobile && <div style={{ height: '56px' }} />}
+      {/* MOBILE BOTTOM NAV */}
+      {isMobile && user && logoDone && (
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: cardBg, borderTop: `1px solid ${borderColor}`, display: 'flex', justifyContent: 'space-around', padding: '6px 0 10px', zIndex: 50 }}>
+          <Link href="/" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: accent, textDecoration: 'none', fontSize: '10px', fontWeight: 600 }}>
+            <Home size={22} color={accent} /> <span>Home</span>
+          </Link>
+          <Link href="/wishlist" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: mutedText, textDecoration: 'none', fontSize: '10px' }}>
+            <Heart size={22} color={mutedText} /> <span>Wishlist</span>
+          </Link>
+          <Link href="/dashboard" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', color: mutedText, textDecoration: 'none', fontSize: '10px' }}>
+            <User size={22} color={mutedText} /> <span>Account</span>
+          </Link>
+        </div>
+      )}
+      {isMobile && <div style={{ height: '56px' }} />}
 
       {!isMobile && (
         <footer style={{ backgroundColor: '#060f1a', borderTop: `1px solid ${borderColor}`, textAlign: 'center', padding: '24px', fontSize: '13px', marginTop: '40px' }}>
@@ -297,8 +323,6 @@ const { theme } = useGlobalTheme()
           <p style={{ color: mutedText }}>© {new Date().getFullYear()} ba Comesa Marketplace. All rights reserved.</p>
         </footer>
       )}
-
-      {isMobile && <div style={{ height: '60px' }} />}
 
       <style jsx>{`
         @keyframes pulseLogo { 0%,100% { transform:scale(1); opacity:.9 } 50% { transform:scale(1.05); opacity:1 } }
